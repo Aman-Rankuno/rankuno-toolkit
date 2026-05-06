@@ -1,26 +1,43 @@
 @import "tailwindcss";
 
+/* ============================================
+   RankUno Brand Colors
+   Per official RankUno Brand Guide 2025
+   ============================================ */
+@theme {
+  /* Primary */
+  --color-ru-red: #DE1921;
+  --color-ru-grey: #58595B;
+
+  /* Accent */
+  --color-accent-red: #DE195F;
+  --color-accent-orange: #DE4F19;
+
+  /* Tertiary, use sparingly */
+  --color-tertiary-teal: #19DED5;
+  --color-tertiary-blue: #1921DE;
+  --color-tertiary-green: #21DE19;
+
+  /* Neutral */
+  --color-neutral-dark: #333333;
+  --color-neutral-light: #F5F5F5;
+  --color-neutral-beige: #F4E3DC;
+}
+
+/* Surface tokens, light mode */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F5F5F5;
+  --foreground: #333333;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-afacad);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-afacad), Georgia, "Domine", serif;
 }
