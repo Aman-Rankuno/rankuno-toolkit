@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RankUno Crawl Toolkit
+
+Internal SEO crawl management toolkit for RankUno. One place to find every crawl, replacing fragile email-based workflows.
+
+## Status
+
+**v0.1.0** - Phase 0 (Foundation Setup) complete. Next.js scaffold, RankUno brand system, shadcn/ui foundation in place. Phase 1 (toolkit UI with mock data) is next.
+
+## Tech Stack
+
+Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · shadcn/ui (Radix + Nova) · Afacad · pnpm
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+|---|---|
+| `pnpm dev` | Dev server (Turbopack) |
+| `pnpm build` | Production build |
+| `pnpm start` | Production server |
+| `pnpm lint` | Run ESLint |
 
-## Learn More
+## Brand
 
-To learn more about Next.js, take a look at the following resources:
+- **Primary:** RU Red `#DE1921`, RU Grey `#58595B`
+- **Surface:** Neutral Light `#F5F5F5`, Neutral Dark `#333333`
+- **Typeface:** Afacad (Regular, Medium, Semibold), Georgia fallback
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Full engineering and brand context: see `CLAUDE.md`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Phases
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Phase | Description |
+|---|---|
+| 0 | ✓ Foundation setup |
+| 1 | Toolkit screens with mock data |
+| 2 | Backend (FastAPI / Postgres / Celery / Redis) |
+| 3+ | Auto-analysis, comparison, multi-user, cloud |
