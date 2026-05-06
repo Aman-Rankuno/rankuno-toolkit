@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Afacad } from "next/font/google";
+import { cn } from "@/lib/utils";
 import "./globals.css";
 
 const afacad = Afacad({
@@ -22,7 +23,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${afacad.variable} h-full antialiased`}
+      className={cn("h-full antialiased font-sans", afacad.variable)}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
