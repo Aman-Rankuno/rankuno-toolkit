@@ -1,13 +1,47 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { Crawl, formatCrawlDate } from "@/lib/crawls";
+import { Crawl } from "@/lib/api";
 import { StatusBadge } from "./StatusBadge";
 
 type CrawlsTableProps = {
   crawls: Crawl[];
 };
 
+function formatCrawlDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  const dateFormatted = date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const timeFormatted = date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${dateFormatted} · ${timeFormatted}`;
+}
+
 export function CrawlsTable({ crawls }: CrawlsTableProps) {
+  if (crawls.length === 0) {
+    return (
+      <section>
+        <div className="mb-3 flex items-baseline justify-between">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-ru-grey">
+            Recent Crawls
+          </h3>
+          <span className="text-xs text-ru-grey">0 crawls</span>
+        </div>
+        <div className="rounded-lg border border-dashed border-ru-grey/25 bg-white px-12 py-16 text-center">
+          <p className="text-sm font-medium text-neutral-dark">No crawls yet</p>
+          <p className="mt-1 text-xs text-ru-grey">
+            Click &quot;New Crawl&quot; in the sidebar to get started
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section>
       <div className="mb-3 flex items-baseline justify-between">
@@ -42,10 +76,7 @@ export function CrawlsTable({ crawls }: CrawlsTableProps) {
           </thead>
           <tbody className="divide-y divide-ru-grey/10">
             {crawls.map((crawl) => (
-              <tr
-                key={crawl.id}
-                className="transition-colors hover:bg-ru-grey/5"
-              >
+              <tr key={crawl.id} className="transition-colors hover:bg-ru-grey/5">
                 <td className="px-5 py-4">
                   <span className="text-sm font-medium text-neutral-dark">
                     {crawl.domain}
@@ -53,13 +84,13 @@ export function CrawlsTable({ crawls }: CrawlsTableProps) {
                 </td>
                 <td className="px-5 py-4">
                   <span className="text-sm text-ru-grey">
-                    {formatCrawlDate(crawl.startedAt)}
+                    {formatCrawlDate(crawl.created_at)}
                   </span>
                 </td>
                 <td className="px-5 py-4 text-right">
                   <span className="text-sm tabular-nums text-neutral-dark">
-                    {crawl.pagesCrawled > 0
-                      ? crawl.pagesCrawled.toLocaleString()
+                    {crawl.pages_crawled > 0
+                      ? crawl.pages_crawled.toLocaleString()
                       : "—"}
                   </span>
                 </td>

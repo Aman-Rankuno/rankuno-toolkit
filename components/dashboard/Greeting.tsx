@@ -1,4 +1,4 @@
-import { Crawl, getCrawlStats, getRecentCompletedCount } from "@/lib/crawls";
+import { Crawl } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 type GreetingProps = {
@@ -7,9 +7,9 @@ type GreetingProps = {
 };
 
 export function Greeting({ name, crawls }: GreetingProps) {
-  const stats = getCrawlStats(crawls);
-  const recentCompleted = getRecentCompletedCount(crawls);
-  const needsAttention = stats.failed;
+  const running = crawls.filter((c) => c.status === "running").length;
+  const completed = crawls.filter((c) => c.status === "completed").length;
+  const failed = crawls.filter((c) => c.status === "failed").length;
 
   return (
     <section className="mb-8">
@@ -19,17 +19,17 @@ export function Greeting({ name, crawls }: GreetingProps) {
       <p className="mt-2 text-base text-ru-grey">
         Here&apos;s where your crawls stand.{" "}
         <span className="font-semibold text-neutral-dark">
-          {stats.running} running
+          {running} running
         </span>
         {", "}
         <span className="font-semibold text-neutral-dark">
-          {recentCompleted} completed this week
+          {completed} completed
         </span>
-        {needsAttention > 0 && (
+        {failed > 0 && (
           <>
             {", "}
             <span className={cn("font-semibold text-ru-red")}>
-              {needsAttention} {needsAttention === 1 ? "needs" : "need"} attention
+              {failed} {failed === 1 ? "needs" : "need"} attention
             </span>
           </>
         )}

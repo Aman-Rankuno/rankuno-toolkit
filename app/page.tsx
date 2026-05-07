@@ -1,17 +1,20 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { Greeting } from "@/components/dashboard/Greeting";
 import { CrawlsTable } from "@/components/dashboard/CrawlsTable";
-import { mockCrawls } from "@/lib/crawls";
+import { fetchCrawls, Crawl } from "@/lib/api";
 
-export default function Home() {
-  const sortedCrawls = [...mockCrawls].sort(
-    (a, b) => b.startedAt.getTime() - a.startedAt.getTime()
-  );
+export default async function Home() {
+  let crawls: Crawl[] = [];
+  try {
+    crawls = await fetchCrawls();
+  } catch {
+    crawls = [];
+  }
 
   return (
     <AppShell title="Dashboard" description="Your SEO crawls at a glance">
-      <Greeting name="G.O.A.T." crawls={mockCrawls} />
-      <CrawlsTable crawls={sortedCrawls} />
+      <Greeting name="G.O.A.T." crawls={crawls} />
+      <CrawlsTable crawls={crawls} />
     </AppShell>
   );
 }
