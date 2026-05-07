@@ -1,8 +1,9 @@
- "use client";
-
+"use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { CrawlConfigForm } from "./CrawlConfigForm";
+import { createCrawl } from "@/lib/api";
 
 export type CrawlSource = "full-site" | "url-list";
 
@@ -47,17 +48,44 @@ export function NewCrawlForm() {
   const [source, setSource] = useState<CrawlSource | null>(null);
   const [config, setConfig] = useState<CrawlConfig>(defaultConfig);
 
-  function handleStart() {
-    console.log("Starting crawl:", { source, config });
-    alert(
-      `Crawl started: ${source} / ${config.crawlType} / ${
-        source === "full-site" ? config.domain : "URL list"
-      }`
-    );
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleStart() {
+    setError("");
+    setLoading(true);
+    try {
+      await createCrawl({
+        domain: source === "full-site" ? config.domain.trim() : config.urls.split("\n")[0].trim(),
+        crawl_type: source === "full-site" ? config.crawlType ?? "full-audit" : "url-list",
+        urls: source === "url-list" ? config.urls.trim() : undefined,
+      });
+      router.push("/");
+    } catch {
+      setError("Failed to start crawl. Make sure the backend is running.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div className="mx-auto max-w-2xl">
+      {error && (
+        <div className="mb-6 rounded-md bg-ru-red/10 px-4 py-3 text-sm text-ru-red">
+          {error}
+        </div>
+      )}
+      {error && (
+        <div className="mb-6 rounded-md bg-ru-red/10 px-4 py-3 text-sm text-ru-red">
+          {error}
+        </div>
+      )}
+      {error && (
+        <div className="mb-6 rounded-md bg-ru-red/10 px-4 py-3 text-sm text-ru-red">
+          {error}
+        </div>
+      )}
       {/* Source selector */}
       <div className="mb-8">
         <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-ru-grey">
@@ -113,6 +141,7 @@ export function NewCrawlForm() {
           config={config}
           onChange={setConfig}
           onStart={handleStart}
+          loading={loading}
         />
       )}
     </div>

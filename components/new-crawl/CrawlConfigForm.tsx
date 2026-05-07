@@ -55,6 +55,7 @@ type CrawlConfigFormProps = {
   config: CrawlConfig;
   onChange: (config: CrawlConfig) => void;
   onStart: () => void;
+  loading?: boolean;
 };
 
 export function CrawlConfigForm({
@@ -62,6 +63,7 @@ export function CrawlConfigForm({
   config,
   onChange,
   onStart,
+  loading = false,
 }: CrawlConfigFormProps) {
   const [openSections, setOpenSections] = useState<AccordionKey[]>(["target"]);
   const isFullSite = source === "full-site";
@@ -369,9 +371,10 @@ export function CrawlConfigForm({
       <button
         type="button"
         onClick={handleStart}
-        className="w-full rounded-md bg-ru-red py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-red"
+        disabled={loading}
+        className="w-full rounded-md bg-ru-red py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-red disabled:opacity-60"
       >
-        Start Crawl
+        {loading ? "Starting..." : "Start Crawl"}
       </button>
     </div>
   );
