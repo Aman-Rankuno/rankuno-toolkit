@@ -3,6 +3,8 @@ import { Greeting } from "@/components/dashboard/Greeting";
 import { CrawlsTable } from "@/components/dashboard/CrawlsTable";
 import { fetchCrawls, Crawl } from "@/lib/api";
 
+export const revalidate = 10;
+
 export default async function Home() {
   let crawls: Crawl[] = [];
   try {
