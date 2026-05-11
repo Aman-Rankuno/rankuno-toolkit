@@ -1,40 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Check,
+  Filter,
+  LineChart,
+  Monitor,
+  Key,
+  PlayCircle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { CrawlConfig, CrawlSource, CrawlType } from "./NewCrawlForm";
+import type { CrawlConfig, CrawlSource } from "./NewCrawlForm";
 
-const CRAWL_TYPES: {
-  value: CrawlType;
-  label: string;
-  description: string;
-}[] = [
-  {
-    value: "full-audit",
-    label: "Full Audit",
-    description: "Complete site crawl with all SEO checks",
-  },
-  {
-    value: "advanced-audit",
-    label: "Advanced Audit",
-    description: "Deep audit with custom extraction rules",
-  },
-  {
-    value: "js-crawl",
-    label: "JS Crawl",
-    description: "JavaScript rendered crawl via headless browser",
-  },
-  {
-    value: "orphan-pages",
-    label: "Orphan Pages",
-    description: "Detect pages with no internal links pointing to them",
-  },
-  {
-    value: "sitemap-generator",
-    label: "Sitemap Generator",
-    description: "Generate an XML sitemap from crawl results",
-  },
+const SF_CONFIGS = [
+  { value: "", label: "Default" },
+  { value: "SEO Spider Config - Basic.seospiderconfig", label: "Basic" },
+  { value: "SEO Spider Config - Basic with URL parameter.seospiderconfig", label: "Basic (URL Parameter)" },
+  { value: "SEO Spider Config - Advance.seospiderconfig", label: "Advanced" },
+  { value: "SEO Spider Config - Advance with URL parameter.seospiderconfig", label: "Advanced (URL Parameter)" },
+  { value: "SEO Spider Config - Java Script.seospiderconfig", label: "JS Crawl" },
+  { value: "SEO Spider Config - Java Script with URL parameter.seospiderconfig", label: "JS Crawl (URL Parameter)" },
 ];
 
 const DEVICES = ["Desktop", "Mobile", "Tablet"];
@@ -83,10 +70,7 @@ export function CrawlConfigForm({
   }
 
   function handleStart() {
-    if (!config.crawlType) {
-      alert("Please select a crawl type.");
-      return;
-    }
+    
     if (isFullSite && !config.domain.trim()) {
       alert("Please enter a domain.");
       return;
@@ -98,118 +82,58 @@ export function CrawlConfigForm({
     onStart();
   }
 
+  const targetComplete = isFullSite
+    ? config.domain.trim().length > 0
+    : config.urls.trim().length > 0;
+  const selectedSfConfig = SF_CONFIGS.find((c) => c.value === config.configFile);
+
+  const summaryParts: string[] = [];
+  if (isFullSite && config.domain.trim()) {
+    summaryParts.push(config.domain.trim());
+  } else if (!isFullSite) {
+    const lines = config.urls.trim().split("\n").filter(Boolean).length;
+    if (lines > 0) summaryParts.push(`${lines} URL${lines === 1 ? "" : "s"}`);
+  }
+  if (selectedSfConfig && selectedSfConfig.label !== "Default")
+    summaryParts.push(selectedSfConfig.label);
+  if (config.gscEmail.trim()) summaryParts.push("GSC linked");
+  if (config.device)
+    summaryParts.push(
+      config.device.charAt(0).toUpperCase() + config.device.slice(1)
+    );
+
   return (
-    <div className="flex flex-col gap-6">
-      {/* SF Config */}
+    <div className="flex flex-col gap-8">
+      {/* 02 — Screaming Frog Configuration */}
       <div>
-        <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-ru-grey">
-          Screaming Frog Configuration
-        </p>
-        <div className="flex flex-col gap-2">
-          {[
-            { value: "", label: "Default", desc: "Use Screaming Frog default settings" },
-            { value: "SEO Spider Config - Basic.seospiderconfig", label: "Basic", desc: "Basic crawl with essential SEO checks" },
-            { value: "SEO Spider Config - Full crawl.seospiderconfig", label: "Full Crawl", desc: "Complete site crawl with all SEO checks" },
-            { value: "SEO Spider Config - Java Script.seospiderconfig", label: "JS Crawl", desc: "JavaScript rendered crawl via headless browser" },
-            { value: "SEO Spider Config - Basic (with URL parameter).seospiderconfig", label: "Basic (URL Parameter)", desc: "Basic crawl including URL parameters" },
-            { value: "SEO Spider Config - Full crawl ( with URL parameter).seospiderconfig", label: "Full Crawl (URL Parameter)", desc: "Full crawl including URL parameters" },
-            { value: "SEO Spider Config - Java Script ( with URL parameter).seospiderconfig", label: "JS Crawl (URL Parameter)", desc: "JS crawl including URL parameters" },
-          ].map((cfg) => (
-            <button
-              key={cfg.value}
-              type="button"
-              onClick={() => set("configFile", cfg.value)}
-              className={cn(
-                "flex items-center gap-4 rounded-lg border px-4 py-3.5 text-left transition-colors",
-                config.configFile === cfg.value
-                  ? "border-ru-red bg-ru-red/5"
-                  : "border-ru-grey/20 bg-white hover:border-ru-grey/40 hover:bg-ru-grey/5"
-              )}
-            >
-              <span className={cn(
-                "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-                config.configFile === cfg.value
-                  ? "border-ru-red bg-ru-red"
-                  : "border-ru-grey/40 bg-white"
-              )}>
-                {config.configFile === cfg.value && (
-                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                )}
-              </span>
-              <div>
-                <p className={cn("text-sm font-medium", config.configFile === cfg.value ? "text-ru-red" : "text-neutral-dark")}>
-                  {cfg.label}
-                </p>
-                <p className="text-xs text-ru-grey">{cfg.desc}</p>
-              </div>
-            </button>
-          ))}
+        <SectionHeader number="02" title="Screaming Frog Configuration" complete={true} />
+        <div className="mt-3">
+          <select
+            value={config.configFile}
+            onChange={(e) => set("configFile", e.target.value)}
+            className="w-full rounded-md border border-ru-grey/25 bg-white px-3 py-3 text-sm font-medium text-neutral-dark focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+          >
+            {SF_CONFIGS.map((cfg) => (
+              <option key={cfg.value} value={cfg.value}>
+                {cfg.label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      
-      {/* Crawl Type */}
+      {/* 03 — Configuration */}
       <div>
-        <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-ru-grey">
-          Crawl Type
-        </p>
-        <div className="flex flex-col gap-2">
-          {CRAWL_TYPES.map((type) => (
-            <button
-              key={type.value}
-              type="button"
-              onClick={() => set("crawlType", type.value)}
-              className={cn(
-                "flex items-center gap-4 rounded-lg border px-4 py-3.5 text-left transition-colors",
-                config.crawlType === type.value
-                  ? "border-ru-red bg-ru-red/5"
-                  : "border-ru-grey/20 bg-white hover:border-ru-grey/40 hover:bg-ru-grey/5"
-              )}
-            >
-              {/* Radio dot */}
-              <span
-                className={cn(
-                  "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-                  config.crawlType === type.value
-                    ? "border-ru-red bg-ru-red"
-                    : "border-ru-grey/40 bg-white"
-                )}
-              >
-                {config.crawlType === type.value && (
-                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                )}
-              </span>
-              <div>
-                <p
-                  className={cn(
-                    "text-sm font-medium",
-                    config.crawlType === type.value
-                      ? "text-ru-red"
-                      : "text-neutral-dark"
-                  )}
-                >
-                  {type.label}
-                </p>
-                <p className="text-xs text-ru-grey">{type.description}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Optional Config */}
-      <div>
-        <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-ru-grey">
-          Configuration
-        </p>
-        <div className="flex flex-col gap-2">
-          {/* Domain / URLs - required */}
+        <SectionHeader number="03" title="Configuration" />
+        <div className="mt-3 flex flex-col gap-2">
           <AccordionSection
             label={isFullSite ? "Domain" : "URLs"}
+            icon={Filter}
             sectionKey="target"
             isOpen={isOpen("target")}
             onToggle={() => toggleSection("target")}
             required
+            complete={targetComplete}
           >
             {isFullSite ? (
               <div className="flex flex-col gap-3">
@@ -254,12 +178,16 @@ export function CrawlConfigForm({
             )}
           </AccordionSection>
 
-          {/* Include & Exclude */}
           <AccordionSection
             label="Include & Exclude"
+            icon={Filter}
             sectionKey="include-exclude"
             isOpen={isOpen("include-exclude")}
             onToggle={() => toggleSection("include-exclude")}
+            complete={
+              config.includePatterns.trim().length > 0 ||
+              config.excludePatterns.trim().length > 0
+            }
           >
             <div className="flex flex-col gap-3">
               <div>
@@ -289,12 +217,13 @@ export function CrawlConfigForm({
             </div>
           </AccordionSection>
 
-          {/* GSC Settings */}
           <AccordionSection
             label="Google Search Console"
+            icon={LineChart}
             sectionKey="gsc"
             isOpen={isOpen("gsc")}
             onToggle={() => toggleSection("gsc")}
+            complete={config.gscEmail.trim().length > 0}
           >
             <div className="flex flex-col gap-3">
               <div>
@@ -319,7 +248,7 @@ export function CrawlConfigForm({
                     onChange={(e) => set("gscDevice", e.target.value)}
                     className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
                   >
-                    {["Desktop", "Mobile", "Tablet"].map((d) => (
+                    {DEVICES.map((d) => (
                       <option key={d} value={d.toLowerCase()}>
                         {d}
                       </option>
@@ -358,12 +287,13 @@ export function CrawlConfigForm({
             </div>
           </AccordionSection>
 
-          {/* Device & User Agent */}
           <AccordionSection
             label="Device & User Agent"
+            icon={Monitor}
             sectionKey="device"
             isOpen={isOpen("device")}
             onToggle={() => toggleSection("device")}
+            complete={config.device !== "desktop"}
           >
             <div>
               <label className="mb-1.5 block text-xs font-medium text-ru-grey">
@@ -389,12 +319,13 @@ export function CrawlConfigForm({
             </div>
           </AccordionSection>
 
-          {/* APIs */}
           <AccordionSection
             label="APIs"
+            icon={Key}
             sectionKey="apis"
             isOpen={isOpen("apis")}
             onToggle={() => toggleSection("apis")}
+            complete={config.apiKey.trim().length > 0}
           >
             <div>
               <label className="mb-1 block text-xs font-medium text-ru-grey">
@@ -415,47 +346,116 @@ export function CrawlConfigForm({
         </div>
       </div>
 
-      {/* Start Crawl */}
-      <button
-        type="button"
-        onClick={handleStart}
-        disabled={loading}
-        className="w-full rounded-md bg-ru-red py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-red disabled:opacity-60"
+      {/* Summary + Start */}
+      <div className="rounded-xl border border-ru-grey/15 bg-white p-5">
+        <div className="mb-4 flex items-start gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-ru-red/10 text-ru-red">
+            <PlayCircle className="h-5 w-5" strokeWidth={2} />
+          </span>
+          <div className="flex-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-ru-grey">
+              Ready to crawl
+            </p>
+            <p className="mt-1 text-sm text-neutral-dark">
+              {summaryParts.length === 0 ? (
+                <span className="text-ru-grey/70">
+                  Fill in the required fields above to start.
+                </span>
+              ) : (
+                summaryParts.map((part, i) => (
+                  <span key={i}>
+                    <span className="font-semibold">{part}</span>
+                    {i < summaryParts.length - 1 && (
+                      <span className="text-ru-grey"> · </span>
+                    )}
+                  </span>
+                ))
+              )}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={handleStart}
+          disabled={loading}
+          className="w-full rounded-md bg-ru-red py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-red disabled:opacity-60"
+        >
+          {loading ? "Starting..." : "Start Crawl"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SectionHeader({
+  number,
+  title,
+  complete,
+}: {
+  number: string;
+  title: string;
+  complete?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <span
+        className={cn(
+          "flex h-7 w-7 items-center justify-center rounded-md text-xs font-bold tabular-nums",
+          complete ? "bg-ru-red text-white" : "bg-ru-grey/10 text-ru-grey"
+        )}
       >
-        {loading ? "Starting..." : "Start Crawl"}
-      </button>
+        {complete ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : number}
+      </span>
+      <p className="text-sm font-semibold uppercase tracking-wider text-ru-grey">
+        {title}
+      </p>
     </div>
   );
 }
 
 type AccordionSectionProps = {
   label: string;
+  icon?: React.ElementType;
   sectionKey: AccordionKey;
   isOpen: boolean;
   onToggle: () => void;
   required?: boolean;
+  complete?: boolean;
   children: React.ReactNode;
 };
 
 function AccordionSection({
   label,
+  icon: Icon,
   isOpen,
   onToggle,
   required,
+  complete,
   children,
 }: AccordionSectionProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-ru-grey/15 bg-white">
+    <div
+      className={cn(
+        "overflow-hidden rounded-lg border bg-white transition-colors",
+        complete ? "border-ru-grey/30" : "border-ru-grey/15"
+      )}
+    >
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between px-4 py-3.5 text-left"
+        className="flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors hover:bg-ru-grey/5"
       >
-        <span className="flex items-center gap-2 text-sm font-medium text-neutral-dark">
+        <span className="flex items-center gap-3 text-sm font-medium text-neutral-dark">
+          {Icon && <Icon className="h-4 w-4 text-ru-grey" strokeWidth={2} />}
           {label}
           {required && (
             <span className="rounded-sm bg-ru-red/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-ru-red">
               Required
+            </span>
+          )}
+          {complete && !required && (
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500/15">
+              <Check className="h-2.5 w-2.5 text-emerald-700" strokeWidth={3} />
             </span>
           )}
         </span>

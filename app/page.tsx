@@ -14,10 +14,9 @@ export default async function Home() {
   }
 
   return (
-    <AppShell title="Dashboard" description="Your SEO crawls at a glance">
+    <AppShell title="Dashboard" description="Your SEO crawls at a glance" showAvatar={false}>
       <Greeting name="RUbots" crawls={crawls} />
       <CrawlsTable crawls={crawls} />
     </AppShell>
   );
 }
-

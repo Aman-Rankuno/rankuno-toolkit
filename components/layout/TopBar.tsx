@@ -3,13 +3,13 @@ import { Search } from "lucide-react";
 type TopBarProps = {
   title: string;
   description?: string;
+  showAvatar?: boolean;
 };
 
-export function TopBar({ title, description }: TopBarProps) {
+export function TopBar({ title, description, showAvatar = true }: TopBarProps) {
   return (
     <header className="border-b border-ru-grey/15 bg-white">
       <div className="flex items-center justify-between gap-4 px-8 py-5">
-        {/* Page title */}
         <div className="min-w-0">
           <h1 className="truncate text-xl font-semibold tracking-tight text-neutral-dark">
             {title}
@@ -20,8 +20,6 @@ export function TopBar({ title, description }: TopBarProps) {
             </p>
           )}
         </div>
-
-        {/* Right side: search + user */}
         <div className="flex shrink-0 items-center gap-3">
           <button
             type="button"
@@ -33,19 +31,17 @@ export function TopBar({ title, description }: TopBarProps) {
               ⌘K
             </kbd>
           </button>
-
-          {/* User avatar */}
-          <div
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-ru-red text-xs font-semibold text-white"
-            aria-label="Current user"
-            title="G.O.A.T."
-          >
-            G
-          </div>
+          {showAvatar && (
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-ru-red text-xs font-semibold text-white"
+              aria-label="Current user"
+              title="G.O.A.T."
+            >
+              G
+            </div>
+          )}
         </div>
       </div>
     </header>
   );
 }
-
-
