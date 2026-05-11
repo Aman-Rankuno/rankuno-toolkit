@@ -26,6 +26,7 @@ export async function createCrawl(payload: {
   domain: string;
   crawl_type: string;
   urls?: string;
+  config_file?: string;
 }): Promise<{ id: string; status: string; message: string }> {
   const res = await fetch(`${API_URL}/api/crawls/`, {
     method: "POST",

@@ -16,6 +16,7 @@ export type CrawlType =
 
 export type CrawlConfig = {
   crawlType: CrawlType | null;
+  configFile: string;
   domain: string;
   startUrl: string;
   urls: string;
@@ -31,6 +32,7 @@ export type CrawlConfig = {
 
 export const defaultConfig: CrawlConfig = {
   crawlType: null,
+  configFile: "",
   domain: "",
   startUrl: "",
   urls: "",
@@ -60,6 +62,7 @@ export function NewCrawlForm() {
         domain: source === "full-site" ? config.domain.trim() : config.urls.split("\n")[0].trim(),
         crawl_type: source === "full-site" ? config.crawlType ?? "full-audit" : "url-list",
         urls: source === "url-list" ? config.urls.trim() : undefined,
+        config_file: config.configFile || undefined,
       });
       router.push("/");
     } catch {
@@ -76,16 +79,7 @@ export function NewCrawlForm() {
           {error}
         </div>
       )}
-      {error && (
-        <div className="mb-6 rounded-md bg-ru-red/10 px-4 py-3 text-sm text-ru-red">
-          {error}
-        </div>
-      )}
-      {error && (
-        <div className="mb-6 rounded-md bg-ru-red/10 px-4 py-3 text-sm text-ru-red">
-          {error}
-        </div>
-      )}
+      
       {/* Source selector */}
       <div className="mb-8">
         <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-ru-grey">

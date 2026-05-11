@@ -100,6 +100,54 @@ export function CrawlConfigForm({
 
   return (
     <div className="flex flex-col gap-6">
+      {/* SF Config */}
+      <div>
+        <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-ru-grey">
+          Screaming Frog Configuration
+        </p>
+        <div className="flex flex-col gap-2">
+          {[
+            { value: "", label: "Default", desc: "Use Screaming Frog default settings" },
+            { value: "SEO Spider Config - Basic.seospiderconfig", label: "Basic", desc: "Basic crawl with essential SEO checks" },
+            { value: "SEO Spider Config - Full crawl.seospiderconfig", label: "Full Crawl", desc: "Complete site crawl with all SEO checks" },
+            { value: "SEO Spider Config - Java Script.seospiderconfig", label: "JS Crawl", desc: "JavaScript rendered crawl via headless browser" },
+            { value: "SEO Spider Config - Basic (with URL parameter).seospiderconfig", label: "Basic (URL Parameter)", desc: "Basic crawl including URL parameters" },
+            { value: "SEO Spider Config - Full crawl ( with URL parameter).seospiderconfig", label: "Full Crawl (URL Parameter)", desc: "Full crawl including URL parameters" },
+            { value: "SEO Spider Config - Java Script ( with URL parameter).seospiderconfig", label: "JS Crawl (URL Parameter)", desc: "JS crawl including URL parameters" },
+          ].map((cfg) => (
+            <button
+              key={cfg.value}
+              type="button"
+              onClick={() => set("configFile", cfg.value)}
+              className={cn(
+                "flex items-center gap-4 rounded-lg border px-4 py-3.5 text-left transition-colors",
+                config.configFile === cfg.value
+                  ? "border-ru-red bg-ru-red/5"
+                  : "border-ru-grey/20 bg-white hover:border-ru-grey/40 hover:bg-ru-grey/5"
+              )}
+            >
+              <span className={cn(
+                "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                config.configFile === cfg.value
+                  ? "border-ru-red bg-ru-red"
+                  : "border-ru-grey/40 bg-white"
+              )}>
+                {config.configFile === cfg.value && (
+                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                )}
+              </span>
+              <div>
+                <p className={cn("text-sm font-medium", config.configFile === cfg.value ? "text-ru-red" : "text-neutral-dark")}>
+                  {cfg.label}
+                </p>
+                <p className="text-xs text-ru-grey">{cfg.desc}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      
       {/* Crawl Type */}
       <div>
         <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-ru-grey">
