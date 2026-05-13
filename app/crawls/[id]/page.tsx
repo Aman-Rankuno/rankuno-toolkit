@@ -1,8 +1,9 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { fetchCrawl } from "@/lib/api";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileArchive, Database, Sheet, FileText } from "lucide-react";
 import Link from "next/link";
+import { PipelineProgress } from "@/components/crawls/PipelineProgress";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -103,8 +104,8 @@ export default async function CrawlDetailPage({ params }: Props) {
 
       {/* Report path or error */}
       {crawl.report_path && (
-        <div className="rounded-lg border border-ru-grey/15 bg-white p-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-ru-grey mb-2">
+        <div className="mb-6 rounded-lg border border-ru-grey/15 bg-white p-6">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ru-grey">
             Report Location
           </p>
           <p className="text-sm font-mono text-neutral-dark break-all">
@@ -113,9 +114,48 @@ export default async function CrawlDetailPage({ params }: Props) {
         </div>
       )}
 
+      {/* Download buttons */}
+      {crawl.status === "completed" && crawl.report_path && (
+        <div className="rounded-lg border border-ru-grey/15 bg-white p-6">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-ru-grey">
+            Downloads
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80"
+            >
+              <FileArchive className="h-4 w-4" strokeWidth={2} />
+              Zip File
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80"
+            >
+              <Database className="h-4 w-4" strokeWidth={2} />
+              DB Spider
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80"
+            >
+              <Sheet className="h-4 w-4" strokeWidth={2} />
+              Mastersheet
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-md bg-ru-red px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80"
+            >
+              <FileText className="h-4 w-4" strokeWidth={2} />
+              Word Document
+            </button>
+          </div>
+        </div>
+      )}
+
       {crawl.error_message && (
         <div className="rounded-lg border border-ru-red/20 bg-ru-red/5 p-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-ru-red mb-2">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ru-red">
             Error
           </p>
           <p className="text-sm text-neutral-dark">{crawl.error_message}</p>

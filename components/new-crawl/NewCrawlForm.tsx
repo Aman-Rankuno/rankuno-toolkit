@@ -24,6 +24,7 @@ export type CrawlConfig = {
   excludePatterns: string;
   gscEmail: string;
   gscDevice: string;
+  gscProperty: string;
   gscDateRange: string;
   gscCountry: string;
   device: string;
@@ -39,6 +40,7 @@ export const defaultConfig: CrawlConfig = {
   includePatterns: "",
   excludePatterns: "",
   gscEmail: "",
+  gscProperty: "",
   gscDevice: "desktop",
   gscDateRange: "last-3-months",
   gscCountry: "",
@@ -73,7 +75,7 @@ export function NewCrawlForm() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-2xl pb-12">
       {error && (
         <div className="mb-6 rounded-md bg-ru-red/10 px-4 py-3 text-sm text-ru-red">
           {error}

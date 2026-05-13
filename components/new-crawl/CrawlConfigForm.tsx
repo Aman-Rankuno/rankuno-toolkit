@@ -70,7 +70,6 @@ export function CrawlConfigForm({
   }
 
   function handleStart() {
-    
     if (isFullSite && !config.domain.trim()) {
       alert("Please enter a domain.");
       return;
@@ -96,7 +95,8 @@ export function CrawlConfigForm({
   }
   if (selectedSfConfig && selectedSfConfig.label !== "Default")
     summaryParts.push(selectedSfConfig.label);
-  if (config.gscEmail.trim()) summaryParts.push("GSC linked");
+  if (config.gscEmail.trim() && config.gscProperty.trim())
+    summaryParts.push("GSC linked");
   if (config.device)
     summaryParts.push(
       config.device.charAt(0).toUpperCase() + config.device.slice(1)
@@ -124,8 +124,8 @@ export function CrawlConfigForm({
 
       {/* 03 — Configuration */}
       <div>
-        <SectionHeader number="03" title="Configuration" />
-        <div className="mt-3 flex flex-col gap-2">
+        
+        <div className="mt-3 flex flex-col gap-3">
           <AccordionSection
             label={isFullSite ? "Domain" : "URLs"}
             icon={Filter}
@@ -223,12 +223,15 @@ export function CrawlConfigForm({
             sectionKey="gsc"
             isOpen={isOpen("gsc")}
             onToggle={() => toggleSection("gsc")}
-            complete={config.gscEmail.trim().length > 0}
+            complete={
+              config.gscEmail.trim().length > 0 &&
+              config.gscProperty.trim().length > 0
+            }
           >
             <div className="flex flex-col gap-3">
               <div>
                 <label className="mb-1 block text-xs font-medium text-ru-grey">
-                  GSC Gmail Account
+                  Gmail Account
                 </label>
                 <input
                   type="email"
@@ -237,52 +240,93 @@ export function CrawlConfigForm({
                   placeholder="team@rankuno.com"
                   className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
                 />
+                <p className="mt-1.5 text-xs text-ru-grey">
+                  The Google account already authenticated inside Screaming Frog on the SF server.
+                </p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-ru-grey">
-                    Device
-                  </label>
-                  <select
-                    value={config.gscDevice}
-                    onChange={(e) => set("gscDevice", e.target.value)}
-                    className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
-                  >
-                    {DEVICES.map((d) => (
-                      <option key={d} value={d.toLowerCase()}>
-                        {d}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-ru-grey">
-                    Date Range
-                  </label>
-                  <select
-                    value={config.gscDateRange}
-                    onChange={(e) => set("gscDateRange", e.target.value)}
-                    className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
-                  >
-                    {GSC_DATE_RANGES.map((r) => (
-                      <option key={r.value} value={r.value}>
-                        {r.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+
               <div>
                 <label className="mb-1 block text-xs font-medium text-ru-grey">
-                  Country
+                  GSC Property
                 </label>
                 <input
                   type="text"
-                  value={config.gscCountry}
-                  onChange={(e) => set("gscCountry", e.target.value)}
-                  placeholder="e.g. Canada, United States"
+                  value={config.gscProperty}
+                  onChange={(e) => set("gscProperty", e.target.value)}
+                  placeholder="sc-domain:manulife.ca"
                   className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
                 />
+                <p className="mt-1.5 text-xs text-ru-grey">
+                  Format:{" "}
+                  <code className="rounded bg-ru-grey/10 px-1 py-0.5 text-[11px]">
+                    sc-domain:example.com
+                  </code>{" "}
+                  for domain properties, or{" "}
+                  <code className="rounded bg-ru-grey/10 px-1 py-0.5 text-[11px]">
+                    https://www.example.com/
+                  </code>{" "}
+                  for URL prefix properties.
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-dashed border-ru-grey/30 bg-ru-grey/5 p-3">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="rounded-sm bg-ru-grey/20 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-ru-grey">
+                    Coming in v2
+                  </span>
+                  <span className="text-[11px] text-ru-grey">
+                    Requires a per-client .seospiderconfig file.
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-ru-grey/60">
+                      Device
+                    </label>
+                    <select
+                      disabled
+                      value={config.gscDevice}
+                      onChange={(e) => set("gscDevice", e.target.value)}
+                      className="w-full cursor-not-allowed rounded-md border border-ru-grey/20 bg-white/60 px-3 py-2.5 text-sm text-ru-grey/60"
+                    >
+                      {DEVICES.map((d) => (
+                        <option key={d} value={d.toLowerCase()}>
+                          {d}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-ru-grey/60">
+                      Date Range
+                    </label>
+                    <select
+                      disabled
+                      value={config.gscDateRange}
+                      onChange={(e) => set("gscDateRange", e.target.value)}
+                      className="w-full cursor-not-allowed rounded-md border border-ru-grey/20 bg-white/60 px-3 py-2.5 text-sm text-ru-grey/60"
+                    >
+                      {GSC_DATE_RANGES.map((r) => (
+                        <option key={r.value} value={r.value}>
+                          {r.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <label className="mb-1 block text-xs font-medium text-ru-grey/60">
+                    Country
+                  </label>
+                  <input
+                    type="text"
+                    disabled
+                    value={config.gscCountry}
+                    onChange={(e) => set("gscCountry", e.target.value)}
+                    placeholder="e.g. Canada, United States"
+                    className="w-full cursor-not-allowed rounded-md border border-ru-grey/20 bg-white/60 px-3 py-2.5 text-sm text-ru-grey/60 placeholder:text-ru-grey/40"
+                  />
+                </div>
               </div>
             </div>
           </AccordionSection>
@@ -347,7 +391,8 @@ export function CrawlConfigForm({
       </div>
 
       {/* Summary + Start */}
-      <div className="rounded-xl border border-ru-grey/15 bg-white p-5">
+      {/* Summary + Start */}
+      <div className="rounded-xl border border-ru-grey/20 bg-white p-6 shadow-lg">
         <div className="mb-4 flex items-start gap-3">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-ru-red/10 text-ru-red">
             <PlayCircle className="h-5 w-5" strokeWidth={2} />
@@ -356,7 +401,7 @@ export function CrawlConfigForm({
             <p className="text-xs font-semibold uppercase tracking-wider text-ru-grey">
               Ready to crawl
             </p>
-            <p className="mt-1 text-sm text-neutral-dark">
+            <p className="mt-2 text-sm text-neutral-dark">
               {summaryParts.length === 0 ? (
                 <span className="text-ru-grey/70">
                   Fill in the required fields above to start.
@@ -443,7 +488,7 @@ function AccordionSection({
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors hover:bg-ru-grey/5"
+        className="flex w-full items-center justify-between px-4 py-4 text-left transition-colors hover:bg-ru-grey/5"
       >
         <span className="flex items-center gap-3 text-sm font-medium text-neutral-dark">
           {Icon && <Icon className="h-4 w-4 text-ru-grey" strokeWidth={2} />}
