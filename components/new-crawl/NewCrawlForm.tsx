@@ -25,6 +25,8 @@ export type CrawlConfig = {
   gscEmail: string;
   gscDevice: string;
   gscProperty: string;
+  gaAccount: "",    
+  gaProperty: "",   
   gscDateRange: string;
   gscCountry: string;
   device: string;
@@ -41,6 +43,8 @@ export const defaultConfig: CrawlConfig = {
   excludePatterns: "",
   gscEmail: "",
   gscProperty: "",
+   gaAccount: "",   
+  gaProperty: "", 
   gscDevice: "desktop",
   gscDateRange: "last-3-months",
   gscCountry: "",
@@ -67,6 +71,8 @@ export function NewCrawlForm() {
         config_file: config.configFile || undefined,
         gsc_account: config.gscEmail.trim() || undefined,
         gsc_property: config.gscProperty.trim() || undefined,
+        ga_account: config.gaAccount.trim() || undefined,    
+        ga_property: config.gaProperty.trim() || undefined,  
         include_patterns: config.includePatterns.trim() || undefined,
         exclude_patterns: config.excludePatterns.trim() || undefined,
       });

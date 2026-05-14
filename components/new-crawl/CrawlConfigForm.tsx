@@ -97,6 +97,8 @@ export function CrawlConfigForm({
     summaryParts.push(selectedSfConfig.label);
   if (config.gscEmail.trim() && config.gscProperty.trim())
     summaryParts.push("GSC linked");
+  if (config.gaAccount.trim() && config.gaProperty.trim())
+  summaryParts.push("GA4 linked");
   if (config.device)
     summaryParts.push(
       config.device.charAt(0).toUpperCase() + config.device.slice(1)
@@ -364,29 +366,51 @@ export function CrawlConfigForm({
           </AccordionSection>
 
           <AccordionSection
-            label="APIs"
-            icon={Key}
-            sectionKey="apis"
-            isOpen={isOpen("apis")}
-            onToggle={() => toggleSection("apis")}
-            complete={config.apiKey.trim().length > 0}
-          >
-            <div>
-              <label className="mb-1 block text-xs font-medium text-ru-grey">
-                API Key
-              </label>
-              <input
-                type="text"
-                value={config.apiKey}
-                onChange={(e) => set("apiKey", e.target.value)}
-                placeholder="Enter API key"
-                className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm font-mono text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
-              />
-              <p className="mt-1.5 text-xs text-ru-grey">
-                Used for third-party integrations. Leave blank if not required.
-              </p>
-            </div>
-          </AccordionSection>
+  label="Google Analytics"
+  icon={Key}
+  sectionKey="apis"
+  isOpen={isOpen("apis")}
+  onToggle={() => toggleSection("apis")}
+  complete={config.gaAccount.trim().length > 0 && config.gaProperty.trim().length > 0}
+>
+  <div className="flex flex-col gap-3">
+    <div>
+      <label className="mb-1 block text-xs font-medium text-ru-grey">
+        Gmail Account
+      </label>
+      <input
+        type="email"
+        value={config.gaAccount}
+        onChange={(e) => set("gaAccount", e.target.value)}
+        placeholder="team@rankuno.com"
+        className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+      />
+      <p className="mt-1.5 text-xs text-ru-grey">
+        The Google account already authenticated inside Screaming Frog on the SF server.
+      </p>
+    </div>
+
+    <div>
+      <label className="mb-1 block text-xs font-medium text-ru-grey">
+        GA4 Property ID
+      </label>
+      <input
+        type="text"
+        value={config.gaProperty}
+        onChange={(e) => set("gaProperty", e.target.value)}
+        placeholder="properties/123456789"
+        className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+      />
+      <p className="mt-1.5 text-xs text-ru-grey">
+        Format:{" "}
+        <code className="rounded bg-ru-grey/10 px-1 py-0.5 text-[11px]">
+          properties/123456789
+        </code>{" "}
+        — find this in GA4 under Admin → Property Settings.
+      </p>
+    </div>
+  </div>
+</AccordionSection>
         </div>
       </div>
 
