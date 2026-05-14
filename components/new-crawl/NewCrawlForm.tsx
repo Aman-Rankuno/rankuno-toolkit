@@ -65,6 +65,10 @@ export function NewCrawlForm() {
         crawl_type: source === "full-site" ? config.crawlType ?? "full-audit" : "url-list",
         urls: source === "url-list" ? config.urls.trim() : undefined,
         config_file: config.configFile || undefined,
+        gsc_account: config.gscEmail.trim() || undefined,
+        gsc_property: config.gscProperty.trim() || undefined,
+        include_patterns: config.includePatterns.trim() || undefined,
+        exclude_patterns: config.excludePatterns.trim() || undefined,
       });
       router.push("/");
     } catch {

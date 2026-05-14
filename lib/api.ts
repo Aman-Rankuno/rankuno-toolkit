@@ -2,6 +2,24 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export type CrawlStatus = "queued" | "running" | "completed" | "failed";
 
+export type CrawlPipelineState = {
+  crawl: "pending" | "running" | "done" | "failed";
+  audit: "pending" | "running" | "done" | "failed";
+  narratives: "pending" | "running" | "done" | "failed";
+  report: "pending" | "running" | "done" | "failed";
+};
+
+export type CrawlMetadataAPI = {
+  site_health_score?: number;
+  issues_count?: number;
+  rows?: number;
+  columns?: number;
+  themes_applied?: boolean;
+  scoring_version?: string;
+  themes_version?: string;
+  generated_at?: string;
+};
+
 export type Crawl = {
   id: string;
   domain: string;
@@ -12,6 +30,9 @@ export type Crawl = {
   error_message: string | null;
   created_at: string;
   completed_at: string | null;
+  failed_step?: "crawl" | "audit" | "narratives" | "report";
+  pipeline?: CrawlPipelineState;
+  metadata?: CrawlMetadataAPI;
 };
 
 export async function fetchCrawls(): Promise<Crawl[]> {
@@ -27,6 +48,10 @@ export async function createCrawl(payload: {
   crawl_type: string;
   urls?: string;
   config_file?: string;
+  gsc_account?: string;
+  gsc_property?: string;
+  include_patterns?: string;
+  exclude_patterns?: string;
 }): Promise<{ id: string; status: string; message: string }> {
   const res = await fetch(`${API_URL}/api/crawls/`, {
     method: "POST",
