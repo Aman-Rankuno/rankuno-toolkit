@@ -3,7 +3,7 @@ import { fetchCrawl } from "@/lib/api";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { ArrowLeft, FileArchive, Database, Sheet, FileText } from "lucide-react";
 import Link from "next/link";
-import { PipelineProgress } from "@/components/crawls/PipelineProgress";
+
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -121,13 +121,14 @@ export default async function CrawlDetailPage({ params }: Props) {
             Downloads
           </p>
           <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
+            <a
+            href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/crawls/${crawl.id}/download/zip`}
+              download
               className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80"
             >
               <FileArchive className="h-4 w-4" strokeWidth={2} />
               Zip File
-            </button>
+            </a>
             <button
               type="button"
               className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80"
