@@ -50,8 +50,10 @@ export async function createCrawl(payload: {
   config_file?: string;
   gsc_account?: string;
   gsc_property?: string;
-  ga_account?: string;       // ADD THIS
-  ga_property?: string; 
+  ga_account?: string;
+  ga4_account?: string;
+  ga4_property?: string;
+  ga4_stream?: string;
   include_patterns?: string;
   exclude_patterns?: string;
 }): Promise<{ id: string; status: string; message: string }> {

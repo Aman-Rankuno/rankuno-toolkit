@@ -97,7 +97,7 @@ export function CrawlConfigForm({
     summaryParts.push(selectedSfConfig.label);
   if (config.gscEmail.trim() && config.gscProperty.trim())
     summaryParts.push("GSC linked");
-  if (config.gaAccount.trim() && config.gaProperty.trim())
+  if (config.gaAccount.trim() && config.ga4Account.trim() && config.ga4Property.trim() && config.ga4Stream.trim())
   summaryParts.push("GA4 linked");
   if (config.device)
     summaryParts.push(
@@ -107,6 +107,38 @@ export function CrawlConfigForm({
   return (
     <div className="flex flex-col gap-8">
       {/* 02 — Screaming Frog Configuration */}
+      {/* 01 — Target */}
+      <div>
+        <SectionHeader
+          number="01"
+          title={isFullSite ? "Target Domain" : "Target URLs"}
+          complete={targetComplete}
+        />
+        <div className="mt-3">
+          {isFullSite ? (
+            <input
+              type="url"
+              value={config.domain}
+              onChange={(e) => set("domain", e.target.value)}
+              placeholder="https://rankuno.com"
+              className="w-full rounded-md border border-ru-grey/25 bg-white px-3 py-3 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+            />
+          ) : (
+            <textarea
+              value={config.urls}
+              onChange={(e) => set("urls", e.target.value)}
+              rows={6}
+              placeholder={"https://example.com/page-1\nhttps://example.com/page-2"}
+              className="w-full resize-none rounded-md border border-ru-grey/25 bg-white px-3 py-3 font-mono text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+            />
+          )}
+          <p className="mt-1.5 text-xs text-ru-grey">
+            {isFullSite
+              ? "Full URL including https://. Must match the GSC property registered above if GSC is used."
+              : "One URL per line. SF will crawl exactly this list, no link discovery."}
+          </p>
+        </div>
+      </div>
       <div>
         <SectionHeader number="02" title="Screaming Frog Configuration" complete={true} />
         <div className="mt-3">
@@ -129,56 +161,76 @@ export function CrawlConfigForm({
         
         <div className="mt-3 flex flex-col gap-3">
           <AccordionSection
-            label={isFullSite ? "Domain" : "URLs"}
-            icon={Filter}
-            sectionKey="target"
-            isOpen={isOpen("target")}
-            onToggle={() => toggleSection("target")}
-            required
-            complete={targetComplete}
-          >
-            {isFullSite ? (
-              <div className="flex flex-col gap-3">
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-ru-grey">
-                    Domain Name
-                  </label>
-                  <input
-                    type="text"
-                    value={config.domain}
-                    onChange={(e) => set("domain", e.target.value)}
-                    placeholder="e.g. manulife.ca"
-                    className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-ru-grey">
-                    Start URL
-                  </label>
-                  <input
-                    type="text"
-                    value={config.startUrl}
-                    onChange={(e) => set("startUrl", e.target.value)}
-                    placeholder="https://manulife.ca"
-                    className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
-                  />
-                </div>
-              </div>
-            ) : (
-              <div>
-                <label className="mb-1 block text-xs font-medium text-ru-grey">
-                  Paste URLs (one per line)
-                </label>
-                <textarea
-                  value={config.urls}
-                  onChange={(e) => set("urls", e.target.value)}
-                  rows={6}
-                  placeholder={"https://example.com/page-1\nhttps://example.com/page-2"}
-                  className="w-full resize-none rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
-                />
-              </div>
-            )}
-          </AccordionSection>
+  label="Google Analytics 4"
+  icon={Key}
+  sectionKey="apis"
+  isOpen={isOpen("apis")}
+  onToggle={() => toggleSection("apis")}
+  complete={
+    config.gaAccount.trim().length > 0 &&
+    config.ga4Account.trim().length > 0 &&
+    config.ga4Property.trim().length > 0 &&
+    config.ga4Stream.trim().length > 0
+  }
+>
+  <div className="flex flex-col gap-3">
+    <div>
+      <label className="mb-1 block text-xs font-medium text-ru-grey">Gmail Account</label>
+      <input
+        type="email"
+        value={config.gaAccount}
+        onChange={(e) => set("gaAccount", e.target.value)}
+        placeholder="Rankuno"
+        className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+      />
+      <p className="mt-1.5 text-xs text-ru-grey">
+        The Google account label as it appears in Screaming Frog. Same as the GSC field above if both use one login.
+      </p>
+    </div>
+
+    <div>
+      <label className="mb-1 block text-xs font-medium text-ru-grey">GA4 Account</label>
+      <input
+        type="text"
+        value={config.ga4Account}
+        onChange={(e) => set("ga4Account", e.target.value)}
+        placeholder="RankUno"
+        className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+      />
+      <p className="mt-1.5 text-xs text-ru-grey">
+        GA4 Account name, exactly as it appears in the SF Account dropdown.
+      </p>
+    </div>
+
+    <div>
+      <label className="mb-1 block text-xs font-medium text-ru-grey">GA4 Property</label>
+      <input
+        type="text"
+        value={config.ga4Property}
+        onChange={(e) => set("ga4Property", e.target.value)}
+        placeholder="RankUno (New Reporting)"
+        className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+      />
+      <p className="mt-1.5 text-xs text-ru-grey">
+        Property label, not the numeric ID. Copy verbatim from the SF Property dropdown.
+      </p>
+    </div>
+
+    <div>
+      <label className="mb-1 block text-xs font-medium text-ru-grey">GA4 Data Stream</label>
+      <input
+        type="text"
+        value={config.ga4Stream}
+        onChange={(e) => set("ga4Stream", e.target.value)}
+        placeholder="rankuno.com"
+        className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+      />
+      <p className="mt-1.5 text-xs text-ru-grey">
+        Data Stream label from the SF Data Stream dropdown.
+      </p>
+    </div>
+  </div>
+</AccordionSection>
 
           <AccordionSection
             label="Include & Exclude"
@@ -363,54 +415,9 @@ export function CrawlConfigForm({
                 ))}
               </div>
             </div>
-          </AccordionSection>
+          </AccordionSection>           
 
-          <AccordionSection
-  label="Google Analytics"
-  icon={Key}
-  sectionKey="apis"
-  isOpen={isOpen("apis")}
-  onToggle={() => toggleSection("apis")}
-  complete={config.gaAccount.trim().length > 0 && config.gaProperty.trim().length > 0}
->
-  <div className="flex flex-col gap-3">
-    <div>
-      <label className="mb-1 block text-xs font-medium text-ru-grey">
-        Gmail Account
-      </label>
-      <input
-        type="email"
-        value={config.gaAccount}
-        onChange={(e) => set("gaAccount", e.target.value)}
-        placeholder="team@rankuno.com"
-        className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
-      />
-      <p className="mt-1.5 text-xs text-ru-grey">
-        The Google account already authenticated inside Screaming Frog on the SF server.
-      </p>
-    </div>
-
-    <div>
-      <label className="mb-1 block text-xs font-medium text-ru-grey">
-        GA4 Property ID
-      </label>
-      <input
-        type="text"
-        value={config.gaProperty}
-        onChange={(e) => set("gaProperty", e.target.value)}
-        placeholder="properties/123456789"
-        className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
-      />
-      <p className="mt-1.5 text-xs text-ru-grey">
-        Format:{" "}
-        <code className="rounded bg-ru-grey/10 px-1 py-0.5 text-[11px]">
-          properties/123456789
-        </code>{" "}
-        — find this in GA4 under Admin → Property Settings.
-      </p>
-    </div>
-  </div>
-</AccordionSection>
+          
         </div>
       </div>
 

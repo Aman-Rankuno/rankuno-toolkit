@@ -25,8 +25,10 @@ export type CrawlConfig = {
   gscEmail: string;
   gscDevice: string;
   gscProperty: string;
-  gaAccount: "",    
-  gaProperty: "",   
+  gaAccount: string;
+  ga4Account: string;
+  ga4Property: string;
+  ga4Stream: string;   
   gscDateRange: string;
   gscCountry: string;
   device: string;
@@ -43,8 +45,10 @@ export const defaultConfig: CrawlConfig = {
   excludePatterns: "",
   gscEmail: "",
   gscProperty: "",
-   gaAccount: "",   
-  gaProperty: "", 
+    gaAccount: "",
+  ga4Account: "",
+  ga4Property: "",
+  ga4Stream: "",
   gscDevice: "desktop",
   gscDateRange: "last-3-months",
   gscCountry: "",
@@ -72,7 +76,9 @@ export function NewCrawlForm() {
         gsc_account: config.gscEmail.trim() || undefined,
         gsc_property: config.gscProperty.trim() || undefined,
         ga_account: config.gaAccount.trim() || undefined,    
-        ga_property: config.gaProperty.trim() || undefined,  
+        ga4_account: config.ga4Account.trim() || undefined,
+        ga4_property: config.ga4Property.trim() || undefined,
+        ga4_stream: config.ga4Stream.trim() || undefined,  
         include_patterns: config.includePatterns.trim() || undefined,
         exclude_patterns: config.excludePatterns.trim() || undefined,
       });
