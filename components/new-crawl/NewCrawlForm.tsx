@@ -91,7 +91,7 @@ export function NewCrawlForm() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl pb-12">
+    <div className="mx-auto w-full max-w-2xl pb-8 sm:pb-12 lg:max-w-3xl">
       {error && (
         <div className="mb-6 rounded-md bg-ru-red/10 px-4 py-3 text-sm text-ru-red">
           {error}

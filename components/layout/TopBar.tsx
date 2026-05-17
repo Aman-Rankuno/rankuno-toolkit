@@ -27,9 +27,7 @@ export function TopBar({ title, description, showAvatar = true }: TopBarProps) {
           >
             <Search className="h-3.5 w-3.5" strokeWidth={2.5} />
             <span className="hidden sm:inline">Search crawls</span>
-            <kbd className="ml-1 hidden rounded border border-ru-grey/20 bg-ru-grey/5 px-1.5 py-0.5 text-[10px] font-medium tracking-wider text-ru-grey sm:inline">
-              ⌘K
-            </kbd>
+            
           </button>
           {showAvatar && (
             <div

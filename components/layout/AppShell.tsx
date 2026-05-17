@@ -14,7 +14,7 @@ export function AppShell({ title, description, showAvatar = false, children }: A
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopBar title={title} description={description} showAvatar={showAvatar} />
-        <main className="flex-1 overflow-y-auto px-8 py-8">{children}</main>
+        <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">{children}</main>
       </div>
     </div>
   );

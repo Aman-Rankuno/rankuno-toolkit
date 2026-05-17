@@ -1,6 +1,6 @@
 "use client";
-
-import { useState } from "react";
+ 
+import { useState, useRef, useEffect } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -10,6 +10,7 @@ import {
   Monitor,
   Key,
   PlayCircle,
+  Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CrawlConfig, CrawlSource } from "./NewCrawlForm";
@@ -23,6 +24,85 @@ const SF_CONFIGS = [
   { value: "SEO Spider Config - Java Script.seospiderconfig", label: "JS Crawl" },
   { value: "SEO Spider Config - Java Script with URL parameter.seospiderconfig", label: "JS Crawl (URL Parameter)" },
 ];
+
+const TARGET_DOMAINS = [
+  "http://architectural.flosusa.com/",
+  "http://rankuno.com/",
+  "http://usa.flos.com/",
+  "http://www.appetizersusa.com/",
+  "http://www.brkthrudigital.com/",
+  "http://www.frozendessertsupplies.com/",
+  "http://www.gep.com/",
+  "http://www.rankuno.com/",
+  "http://www.sculptwareonline.com/",
+  "http://www.seniority.in/",
+  "https://architectural.flosusa.com/",
+  "https://biotech.pall.com/",
+  "https://cellandgene.com/",
+  "https://chemicals-polymers.pall.com/",
+  "https://eu.idtdna.com/",
+  "https://fitday.in/",
+  "https://food-beverage.pall.com/",
+  "https://fractionalcmo.io/",
+  "https://frozendessertsupplies.com/",
+  "https://laboratory.pall.com/",
+  "https://lifesciences.danaher.com/",
+  "https://logicsource.com/",
+  "https://medical.pall.com/",
+  "https://oil-gas.pall.com/",
+  "https://osacommerce.com/",
+  "https://power-utilities.pall.com/",
+  "https://prospur.io/",
+  "https://reserveage.tlcchealth.com/",
+  "https://sciex.com/",
+  "https://service-tree.com/",
+  "https://sg.idtdna.com/",
+  "https://shop.leica-microsystems.com/",
+  "https://shop.pall.co.uk/",
+  "https://shop.pall.com/",
+  "https://twinlab.tlcchealth.com/",
+  "https://vitaquest.com/",
+  "https://www.ababy.com/",
+  "https://www.abcam.cn/",
+  "https://www.abcam.co.jp/",
+  "https://www.abcam.com/",
+  "https://www.abcam.com/en-us/",
+  "https://www.anniesannuals.com/",
+  "https://www.appetizersusa.com/",
+  "https://www.bhadepay.com/",
+  "https://www.bioprocessonline.com/",
+  "https://www.bloomingdales.com/",
+  "https://www.brkthrudigital.com/",
+  "https://www.cellandgene.com/",
+  "https://www.clinicalleader.com/",
+  "https://www.danaher.com/",
+  "https://www.fairychimneys.com.au/",
+  "https://www.frozendessertsupplies.com/",
+  "https://www.genedata.com/",
+  "https://www.gep.com/",
+  "https://www.idtdna.com/",
+  "https://www.leica-microsystems.com.cn/",
+  "https://www.leica-microsystems.com/",
+  "https://www.leica-microsystems.com/de/",
+  "https://www.leica-microsystems.com/fr/",
+  "https://www.leica-microsystems.com/it/",
+  "https://www.leica-microsystems.com/jp/",
+  "https://www.leica-microsystems.com/ko/",
+  "https://www.leica-microsystems.com/pt/",
+  "https://www.letsrenovate.com/",
+  "https://www.moleculardevices.com/",
+  "https://www.outsourcedpharma.com/",
+  "https://www.pall.co.uk/",
+  "https://www.phenomenex.com/",
+  "https://www.rankuno.com/solutions/",
+  "https://www.resvitale.co/",
+  "https://www.sculptwareonline.com/",
+  "https://www.seniority.in/",
+  "https://www.seniority.in/blog/",
+  "https://www.twinlab.com/",
+  "https://www.virima.com/",
+  "https://www.wateronline.com/",
+]; 
 
 const DEVICES = ["Desktop", "Mobile", "Tablet"];
 
@@ -105,7 +185,7 @@ export function CrawlConfigForm({
     );
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6 sm:gap-7 lg:gap-8">
       {/* 02 — Screaming Frog Configuration */}
       {/* 01 — Target */}
       <div>
@@ -114,14 +194,12 @@ export function CrawlConfigForm({
           title={isFullSite ? "Target Domain" : "Target URLs"}
           complete={targetComplete}
         />
-        <div className="mt-3">
-          {isFullSite ? (
-            <input
-              type="url"
+        <div className="mt-3 sm:mt-4">
+            {isFullSite ? (
+          <DomainDropdown
               value={config.domain}
-              onChange={(e) => set("domain", e.target.value)}
-              placeholder="https://rankuno.com"
-              className="w-full rounded-md border border-ru-grey/25 bg-white px-3 py-3 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+              options={TARGET_DOMAINS}
+              onChange={(val) => set("domain", val)}
             />
           ) : (
             <textarea
@@ -141,7 +219,7 @@ export function CrawlConfigForm({
       </div>
       <div>
         <SectionHeader number="02" title="Screaming Frog Configuration" complete={true} />
-        <div className="mt-3">
+        <div className="mt-3 sm:mt-4">
           <select
             value={config.configFile}
             onChange={(e) => set("configFile", e.target.value)}
@@ -159,7 +237,7 @@ export function CrawlConfigForm({
       {/* 03 — Configuration */}
       <div>
         
-        <div className="mt-3 flex flex-col gap-3">
+        <div className="mt-3 sm:mt-4 flex flex-col gap-2.5 sm:gap-3">
           <AccordionSection
   label="Google Analytics 4"
   icon={Key}
@@ -368,7 +446,7 @@ export function CrawlConfigForm({
                     </select>
                   </div>
                 </div>
-                <div className="mt-3">
+                <div className="mt-3 sm:mt-4">
                   <label className="mb-1 block text-xs font-medium text-ru-grey/60">
                     Country
                   </label>
@@ -423,7 +501,7 @@ export function CrawlConfigForm({
 
       {/* Summary + Start */}
       {/* Summary + Start */}
-      <div className="rounded-xl border border-ru-grey/20 bg-white p-6 shadow-lg">
+      <div className="rounded-xl border border-ru-grey/20 bg-white p-5 sm:p-6 lg:p-7 shadow-lg">
         <div className="mb-4 flex items-start gap-3">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-ru-red/10 text-ru-red">
             <PlayCircle className="h-5 w-5" strokeWidth={2} />
@@ -549,3 +627,200 @@ function AccordionSection({
     </div>
   );
 }
+
+/* ============================================================
+
+   Custom Domain Dropdown
+
+   Opens DOWN, searchable, fully styled (no native <select>)
+
+   ============================================================ */
+
+function DomainDropdown({
+
+  value,
+
+  options,
+
+  onChange,
+
+}: {
+
+  value: string;
+
+  options: string[];
+
+  onChange: (val: string) => void;
+
+}) {
+
+  const [open, setOpen] = useState(false);
+
+  const [search, setSearch] = useState("");
+
+  const wrapRef = useRef<HTMLDivElement>(null);
+ 
+  useEffect(() => {
+
+    function handleClickOutside(e: MouseEvent) {
+
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+
+        setOpen(false);
+
+        setSearch("");
+
+      }
+
+    }
+
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+  }, [open]);
+ 
+  const filtered = search
+
+    ? options.filter((url) => url.toLowerCase().includes(search.toLowerCase()))
+
+    : options;
+ 
+  return (
+<div ref={wrapRef} className="relative w-full">
+<button
+
+        type="button"
+
+        onClick={() => setOpen((o) => !o)}
+
+        className={cn(
+
+          "flex w-full items-center justify-between rounded-md border bg-white px-3 py-3 text-left text-sm transition-colors",
+
+          open ? "border-ru-red ring-2 ring-ru-red/20" : "border-ru-grey/25 hover:border-ru-grey/40",
+
+          value ? "font-medium text-neutral-dark" : "text-ru-grey/60"
+
+        )}
+>
+<span className="truncate">{value || "Select a domain..."}</span>
+<ChevronDown
+
+          className={cn(
+
+            "ml-2 h-4 w-4 shrink-0 text-ru-grey transition-transform",
+
+            open && "rotate-180"
+
+          )}
+
+          strokeWidth={2}
+
+        />
+</button>
+ 
+      {open && (
+<div className="absolute left-0 top-full z-50 mt-1.5 w-full overflow-hidden rounded-lg border border-ru-grey/20 bg-white shadow-xl">
+
+          {/* Search input */}
+<div className="border-b border-ru-grey/10 p-2">
+<div className="relative">
+<Search
+
+                className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ru-grey"
+
+                strokeWidth={2}
+
+              />
+<input
+
+                autoFocus
+
+                type="text"
+
+                value={search}
+
+                onChange={(e) => setSearch(e.target.value)}
+
+                placeholder="Search domains..."
+
+                className="w-full rounded-md border border-ru-grey/15 bg-ru-grey/5 py-2 pl-8 pr-3 text-sm text-neutral-dark placeholder:text-ru-grey/50 focus:border-ru-red focus:bg-white focus:outline-none"
+
+              />
+</div>
+</div>
+ 
+          {/* Options list */}
+<div className="max-h-72 overflow-y-auto py-1">
+
+            {filtered.length === 0 ? (
+<div className="px-3 py-6 text-center text-xs text-ru-grey">
+
+                No domains match &quot;{search}&quot;
+</div>
+
+            ) : (
+
+              filtered.map((url) => {
+
+                const isSelected = url === value;
+
+                return (
+<button
+
+                    key={url}
+
+                    type="button"
+
+                    onClick={() => {
+
+                      onChange(url);
+
+                      setOpen(false);
+
+                      setSearch("");
+
+                    }}
+
+                    className={cn(
+
+                      "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition-colors",
+
+                      isSelected
+
+                        ? "bg-ru-red/5 text-ru-red"
+
+                        : "text-neutral-dark hover:bg-ru-grey/5"
+
+                    )}
+>
+<span className="truncate">{url}</span>
+
+                    {isSelected && (
+<Check className="h-4 w-4 shrink-0 text-ru-red" strokeWidth={2.5} />
+
+                    )}
+</button>
+
+                );
+
+              })
+
+            )}
+</div>
+ 
+          {/* Footer count */}
+<div className="border-t border-ru-grey/10 bg-ru-grey/5 px-3 py-1.5 text-[11px] font-medium text-ru-grey">
+
+            {filtered.length} of {options.length} domains
+</div>
+</div>
+
+      )}
+</div>
+
+  );
+
+}
+ 
