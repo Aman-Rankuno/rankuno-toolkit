@@ -1,9 +1,8 @@
 "use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, GitCompare, Sparkles, Settings } from "lucide-react";
+import { LayoutGrid, GitCompare, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NewCrawlTrigger } from "@/components/dashboard/NewCrawlTrigger";
 
@@ -15,13 +14,12 @@ type NavItem = {
 };
 
 const primaryNav: NavItem[] = [
-  { label: "Dashboard", href: "/", icon: LayoutGrid,  },
+  { label: "Dashboard", href: "/", icon: LayoutGrid },
 ];
 
 const secondaryNav: NavItem[] = [
   { label: "Comparisons", href: "#", icon: GitCompare, status: "soon" },
   { label: "Analysis", href: "#", icon: Sparkles, status: "soon" },
-  { label: "Settings", href: "#", icon: Settings },
 ];
 
 function NavList({ items }: { items: NavItem[] }) {
@@ -63,7 +61,6 @@ function NavList({ items }: { items: NavItem[] }) {
 export function Sidebar() {
   return (
     <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-ru-grey/15 bg-white">
-      {/* Brand */}
       <div className="border-b border-ru-grey/15 px-6 py-5">
         <Link href="/" className="inline-block">
           <Image
@@ -79,20 +76,13 @@ export function Sidebar() {
           Crawl Toolkit
         </p>
       </div>
-
-      {/* Nav */}
       <nav className="flex-1 px-3 py-4">
         <NavList items={primaryNav} />
-
-        {/* New Crawl CTA */}
         <div className="my-2 px-0.5">
           <NewCrawlTrigger />
         </div>
-
         <NavList items={secondaryNav} />
       </nav>
-
-      {/* Footer */}
       <div className="border-t border-ru-grey/15 px-6 py-4">
         <div className="flex items-center justify-between text-xs text-ru-grey">
           <span className="font-medium">Internal Tool</span>
