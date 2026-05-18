@@ -7,7 +7,6 @@ import {
   Check,
   Filter,
   LineChart,
-  Monitor,
   Key,
   PlayCircle,
   Search,
@@ -115,7 +114,7 @@ const GSC_DATE_RANGES = [
   { value: "last-16-months", label: "Last 16 months" },
 ];
 
-type AccordionKey = "target" | "include-exclude" | "gsc" | "device" | "apis";
+type AccordionKey = "target" | "include-exclude" | "gsc" | "apis";
 
 type CrawlConfigFormProps = {
   source: CrawlSource;
@@ -179,13 +178,10 @@ export function CrawlConfigForm({
     summaryParts.push("GSC linked");
   if (config.gaAccount.trim() && config.ga4Account.trim() && config.ga4Property.trim() && config.ga4Stream.trim())
   summaryParts.push("GA4 linked");
-  if (config.device)
-    summaryParts.push(
-      config.device.charAt(0).toUpperCase() + config.device.slice(1)
-    );
+  
 
   return (
-    <div className="flex flex-col gap-6 sm:gap-7 lg:gap-8">
+    <div className="flex flex-col gap-8 sm:gap-10">
       {/* 02 — Screaming Frog Configuration */}
       {/* 01 — Target */}
       <div>
@@ -210,14 +206,14 @@ export function CrawlConfigForm({
               className="w-full resize-none rounded-md border border-ru-grey/25 bg-white px-3 py-3 font-mono text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
             />
           )}
-          <p className="mt-1.5 text-xs text-ru-grey">
+          <p className="mt-1.5 mb-4 text-xs text-ru-grey">
             {isFullSite
               ? "Full URL including https://. Must match the GSC property registered above if GSC is used."
               : "One URL per line. SF will crawl exactly this list, no link discovery."}
           </p>
         </div>
       </div>
-      <div>
+      <div className="mt-8">
         <SectionHeader number="02" title="Screaming Frog Configuration" complete={true} />
         <div className="mt-3 sm:mt-4">
           <select
@@ -236,8 +232,47 @@ export function CrawlConfigForm({
 
       {/* 03 — Configuration */}
       <div>
-        
-        <div className="mt-3 sm:mt-4 flex flex-col gap-2.5 sm:gap-3">
+        <div className="h-px bg-ru-grey/10" />
+        <div className="mt-3 sm:mt-4 flex flex-col gap-3 sm:gap-4">
+          <AccordionSection
+            label="Include & Exclude"
+            icon={Filter}
+            sectionKey="include-exclude"
+            isOpen={isOpen("include-exclude")}
+            onToggle={() => toggleSection("include-exclude")}
+            complete={
+              config.includePatterns.trim().length > 0 ||
+              config.excludePatterns.trim().length > 0
+            }
+          >
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-ru-grey">
+                  Include patterns
+                </label>
+                <textarea
+                  value={config.includePatterns}
+                  onChange={(e) => set("includePatterns", e.target.value)}
+                  rows={2}
+                  placeholder={"/blog/\n/products/"}
+                  className="w-full resize-none rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-ru-grey">
+                  Exclude patterns
+                </label>
+                <textarea
+                  value={config.excludePatterns}
+                  onChange={(e) => set("excludePatterns", e.target.value)}
+                  rows={2}
+                  placeholder={"/admin/\n/login/"}
+                  className="w-full resize-none rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+                />
+              </div>
+            </div>
+          </AccordionSection>
+
           <AccordionSection
   label="Google Analytics 4"
   icon={Key}
@@ -261,7 +296,7 @@ export function CrawlConfigForm({
         placeholder="Rankuno"
         className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
       />
-      <p className="mt-1.5 text-xs text-ru-grey">
+      <p className="mt-1.5 mb-2 text-xs text-ru-grey">
         The Google account label as it appears in Screaming Frog. Same as the GSC field above if both use one login.
       </p>
     </div>
@@ -309,46 +344,6 @@ export function CrawlConfigForm({
     </div>
   </div>
 </AccordionSection>
-
-          <AccordionSection
-            label="Include & Exclude"
-            icon={Filter}
-            sectionKey="include-exclude"
-            isOpen={isOpen("include-exclude")}
-            onToggle={() => toggleSection("include-exclude")}
-            complete={
-              config.includePatterns.trim().length > 0 ||
-              config.excludePatterns.trim().length > 0
-            }
-          >
-            <div className="flex flex-col gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-ru-grey">
-                  Include patterns
-                </label>
-                <textarea
-                  value={config.includePatterns}
-                  onChange={(e) => set("includePatterns", e.target.value)}
-                  rows={2}
-                  placeholder={"/blog/\n/products/"}
-                  className="w-full resize-none rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-ru-grey">
-                  Exclude patterns
-                </label>
-                <textarea
-                  value={config.excludePatterns}
-                  onChange={(e) => set("excludePatterns", e.target.value)}
-                  rows={2}
-                  placeholder={"/admin/\n/login/"}
-                  className="w-full resize-none rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
-                />
-              </div>
-            </div>
-          </AccordionSection>
-
           <AccordionSection
             label="Google Search Console"
             icon={LineChart}
@@ -463,39 +458,6 @@ export function CrawlConfigForm({
             </div>
           </AccordionSection>
 
-          <AccordionSection
-            label="Device & User Agent"
-            icon={Monitor}
-            sectionKey="device"
-            isOpen={isOpen("device")}
-            onToggle={() => toggleSection("device")}
-            complete={config.device !== "desktop"}
-          >
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-ru-grey">
-                Crawl Device
-              </label>
-              <div className="flex gap-2">
-                {DEVICES.map((d) => (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => set("device", d.toLowerCase())}
-                    className={cn(
-                      "flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors",
-                      config.device === d.toLowerCase()
-                        ? "border-ru-red bg-ru-red/5 text-ru-red"
-                        : "border-ru-grey/25 text-ru-grey hover:border-ru-grey/50"
-                    )}
-                  >
-                    {d}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </AccordionSection>           
-
-          
         </div>
       </div>
 
@@ -736,7 +698,8 @@ function DomainDropdown({
 <input
 
                 autoFocus
-
+                
+                autoComplete="off"
                 type="text"
 
                 value={search}
@@ -753,60 +716,45 @@ function DomainDropdown({
  
           {/* Options list */}
 <div className="max-h-72 overflow-y-auto py-1">
-
             {filtered.length === 0 ? (
-<div className="px-3 py-6 text-center text-xs text-ru-grey">
-
-                No domains match &quot;{search}&quot;
-</div>
-
+              <button
+                type="button"
+                onClick={() => { onChange(search); setOpen(false); setSearch(""); }}
+                className="flex w-full items-center gap-2 px-3 py-3 text-left text-sm text-ru-red hover:bg-ru-red/5"
+              >
+                <span className="font-medium">Use &quot;{search}&quot;</span>
+                <span className="text-xs text-ru-grey">as custom domain</span>
+              </button>
             ) : (
-
-              filtered.map((url) => {
-
-                const isSelected = url === value;
-
-                return (
-<button
-
-                    key={url}
-
+              <>
+                {search.trim() && (
+                  <button
                     type="button"
-
-                    onClick={() => {
-
-                      onChange(url);
-
-                      setOpen(false);
-
-                      setSearch("");
-
-                    }}
-
-                    className={cn(
-
-                      "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition-colors",
-
-                      isSelected
-
-                        ? "bg-ru-red/5 text-ru-red"
-
-                        : "text-neutral-dark hover:bg-ru-grey/5"
-
-                    )}
->
-<span className="truncate">{url}</span>
-
-                    {isSelected && (
-<Check className="h-4 w-4 shrink-0 text-ru-red" strokeWidth={2.5} />
-
-                    )}
-</button>
-
-                );
-
-              })
-
+                    onClick={() => { onChange(search); setOpen(false); setSearch(""); }}
+                    className="flex w-full items-center gap-2 border-b border-ru-grey/10 px-3 py-2.5 text-left text-sm text-ru-red hover:bg-ru-red/5"
+                  >
+                    <span className="font-medium">Use &quot;{search}&quot;</span>
+                    <span className="text-xs text-ru-grey">as custom domain</span>
+                  </button>
+                )}
+                {filtered.map((url) => {
+                  const isSelected = url === value;
+                  return (
+                    <button
+                      key={url}
+                      type="button"
+                      onClick={() => { onChange(url); setOpen(false); setSearch(""); }}
+                      className={cn(
+                        "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition-colors",
+                        isSelected ? "bg-ru-red/5 text-ru-red" : "text-neutral-dark hover:bg-ru-grey/5"
+                      )}
+                    >
+                      <span className="truncate">{url}</span>
+                      {isSelected && <Check className="h-4 w-4 shrink-0 text-ru-red" strokeWidth={2.5} />}
+                    </button>
+                  );
+                })}
+              </>
             )}
 </div>
  
