@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
@@ -83,42 +83,26 @@ export function CrawlDetailPoller({ initial }: { initial: Crawl }) {
         <div className="rounded-lg border border-ru-grey/15 bg-white p-6">
           <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-ru-grey">Downloads</p>
           <div className="flex flex-wrap gap-3">
-            <a
-              href={`${API_URL}/api/crawls/${crawl.id}/download/zip`}
-              download
-              className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80"
-            >
-              <FileArchive className="h-4 w-4" strokeWidth={2} />
-              Zip File
+            <a href={`${API_URL}/api/crawls/${crawl.id}/download/zip`} download className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80">
+              <FileArchive className="h-4 w-4" strokeWidth={2} />Zip File
             </a>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80"
-            >
-              <Database className="h-4 w-4" strokeWidth={2} />
-              DB Spider
+            <button type="button" className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80">
+              <Database className="h-4 w-4" strokeWidth={2} />DB Spider
             </button>
-            <a
-              href={`${API_URL}/api/crawls/${crawl.id}/download/masterfile/response-codes-internal`}
-              download
-              className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80"
-            >
-              <Sheet className="h-4 w-4" strokeWidth={2} />
-              Response Codes
+            <a href={`${API_URL}/api/crawls/${crawl.id}/download/masterfile/response-codes-internal`} download className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80">
+              <Sheet className="h-4 w-4" strokeWidth={2} />Response Codes
             </a>
-            <a
-              href={`${API_URL}/api/crawls/${crawl.id}/download/masterfile/url-issues`}
-              download
-              className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80"
-            >
-              <Sheet className="h-4 w-4" strokeWidth={2} />
-              URL Issues</a><a href={`${API_URL}/api/crawls/${crawl.id}/download/masterfile/page-titles`} download className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80"><Sheet className="h-4 w-4" strokeWidth={2} />Page Titles</a>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-md bg-ru-red px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80"
-            >
-              <FileText className="h-4 w-4" strokeWidth={2} />
-              Word Document
+            <a href={`${API_URL}/api/crawls/${crawl.id}/download/masterfile/url-issues`} download className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80">
+              <Sheet className="h-4 w-4" strokeWidth={2} />URL Issues
+            </a>
+            <a href={`${API_URL}/api/crawls/${crawl.id}/download/masterfile/page-titles`} download className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80">
+              <Sheet className="h-4 w-4" strokeWidth={2} />Page Titles
+            </a>
+            <a href={`${API_URL}/api/crawls/${crawl.id}/download/masterfile/meta-description`} download className="inline-flex items-center gap-2 rounded-md bg-ru-grey px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80">
+              <Sheet className="h-4 w-4" strokeWidth={2} />Meta Description
+            </a>
+            <button type="button" className="inline-flex items-center gap-2 rounded-md bg-ru-red px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80">
+              <FileText className="h-4 w-4" strokeWidth={2} />Word Document
             </button>
           </div>
         </div>

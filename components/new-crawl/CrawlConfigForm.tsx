@@ -15,6 +15,27 @@ import { cn } from "@/lib/utils";
 import type { CrawlConfig, CrawlSource } from "./NewCrawlForm";
 import { TARGET_DOMAINS } from "./domains";
 
+const GA4_EMAILS = [
+  "DHLS",
+  "Rankuno",
+  "access@rankuno.com",
+  "analysis@serialscaling.com",
+  "infy.technologies@gmail.com",
+  "phenomenex@rankuno.com",
+  "sutrishna@serialscaling.com",
+];
+
+const GSC_EMAILS = [
+  "DHLS",
+  "Rankuno.com",
+  "access@rankuno.com",
+  "analysis@serialscaling.com",
+  "infy.technologies@gmail.com",
+  "phenomenex@rankuno.com",
+  "sutrishna.rankuno@gmail.com",
+  "sutrishna@serialscaling.com",
+];
+
 const SF_CONFIGS = [
   { value: "", label: "Default" },
   { value: "SEO Spider Config - Basic.seospiderconfig", label: "Basic" },
@@ -211,12 +232,10 @@ export function CrawlConfigForm({
   <div className="flex flex-col gap-3">
     <div>
       <label className="mb-1 block text-xs font-medium text-ru-grey">Gmail Account</label>
-      <input
-        type="email"
+      <EmailDropdown
         value={config.gaAccount}
-        onChange={(e) => set("gaAccount", e.target.value)}
-        placeholder="Rankuno"
-        className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+        options={GA4_EMAILS}
+        onChange={(val) => set("gaAccount", val)}
       />
       <p className="mt-1.5 mb-2 text-xs text-ru-grey">
         The Google account label as it appears in Screaming Frog. Same as the GSC field above if both use one login.
@@ -282,12 +301,10 @@ export function CrawlConfigForm({
                 <label className="mb-1 block text-xs font-medium text-ru-grey">
                   Gmail Account
                 </label>
-                <input
-                  type="email"
+                <EmailDropdown
                   value={config.gscEmail}
-                  onChange={(e) => set("gscEmail", e.target.value)}
-                  placeholder="team@rankuno.com"
-                  className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+                  options={GSC_EMAILS}
+                  onChange={(val) => set("gscEmail", val)}
                 />
                 <p className="mt-1.5 text-xs text-ru-grey">
                   The Google account already authenticated inside Screaming Frog on the SF server.
@@ -693,4 +710,87 @@ function DomainDropdown({
   );
 
 }
- 
+
+/* ============================================================
+   Email Dropdown
+   Same style as DomainDropdown, but without search box
+   ============================================================ */
+function EmailDropdown({
+  value,
+  options,
+  onChange,
+}: {
+  value: string;
+  options: string[];
+  onChange: (val: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div ref={wrapRef} className="relative w-full">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className={cn(
+          "flex w-full items-center justify-between rounded-md border bg-white px-3 py-2.5 text-left text-sm transition-colors",
+          open ? "border-ru-red ring-2 ring-ru-red/20" : "border-ru-grey/25 hover:border-ru-grey/40",
+          value ? "font-medium text-neutral-dark" : "text-ru-grey/60"
+        )}
+      >
+        <span className="truncate">{value || "Select a Gmail account..."}</span>
+        <ChevronDown
+          className={cn(
+            "ml-2 h-4 w-4 shrink-0 text-ru-grey transition-transform",
+            open && "rotate-180"
+          )}
+          strokeWidth={2}
+        />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full z-50 mt-1.5 w-full overflow-hidden rounded-lg border border-ru-grey/20 bg-white shadow-xl">
+          <div className="max-h-64 overflow-y-auto py-1">
+            {options.map((email) => {
+              const isSelected = email === value;
+              return (
+                <button
+                  key={email}
+                  type="button"
+                  onClick={() => {
+                    onChange(email);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition-colors",
+                    isSelected
+                      ? "bg-ru-red/5 text-ru-red"
+                      : "text-neutral-dark hover:bg-ru-grey/5"
+                  )}
+                >
+                  <span className="truncate">{email}</span>
+                  {isSelected && (
+                    <Check className="h-4 w-4 shrink-0 text-ru-red" strokeWidth={2.5} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <div className="border-t border-ru-grey/10 bg-ru-grey/5 px-3 py-1.5 text-[11px] font-medium text-ru-grey">
+            {options.length} accounts available
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
