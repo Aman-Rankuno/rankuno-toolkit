@@ -1,14 +1,15 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL =
+  typeof window === "undefined"
+    ? process.env.API_URL_SERVER || "http://localhost:8000"
+    : process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-export type CrawlStatus = "queued" | "running" | "completed" | "failed";
-
+export type CrawlStatus = 'queued' | 'running' | 'completed' | 'failed';
 export type CrawlPipelineState = {
-  crawl: "pending" | "running" | "done" | "failed";
-  audit: "pending" | "running" | "done" | "failed";
-  narratives: "pending" | "running" | "done" | "failed";
-  report: "pending" | "running" | "done" | "failed";
+  crawl: 'pending' | 'running' | 'done' | 'failed';
+  audit: 'pending' | 'running' | 'done' | 'failed';
+  narratives: 'pending' | 'running' | 'done' | 'failed';
+  report: 'pending' | 'running' | 'done' | 'failed';
 };
-
 export type CrawlMetadataAPI = {
   site_health_score?: number;
   issues_count?: number;
@@ -19,7 +20,6 @@ export type CrawlMetadataAPI = {
   themes_version?: string;
   generated_at?: string;
 };
-
 export type Crawl = {
   id: string;
   domain: string;
@@ -30,19 +30,17 @@ export type Crawl = {
   error_message: string | null;
   created_at: string;
   completed_at: string | null;
-  failed_step?: "crawl" | "audit" | "narratives" | "report";
+  failed_step?: 'crawl' | 'audit' | 'narratives' | 'report';
   pipeline?: CrawlPipelineState;
   metadata?: CrawlMetadataAPI;
 };
-
 export async function fetchCrawls(): Promise<Crawl[]> {
   const res = await fetch(`${API_URL}/api/crawls/`, {
-    cache: "no-store",
+    cache: 'no-store',
   });
-  if (!res.ok) throw new Error("Failed to fetch crawls");
+  if (!res.ok) throw new Error('Failed to fetch crawls');
   return res.json();
 }
-
 export async function createCrawl(payload: {
   domain: string;
   crawl_type: string;
@@ -58,18 +56,17 @@ export async function createCrawl(payload: {
   exclude_patterns?: string;
 }): Promise<{ id: string; status: string; message: string }> {
   const res = await fetch(`${API_URL}/api/crawls/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Failed to create crawl");
+  if (!res.ok) throw new Error('Failed to create crawl');
   return res.json();
 }
-
 export async function fetchCrawl(id: string): Promise<Crawl> {
   const res = await fetch(`${API_URL}/api/crawls/${id}`, {
-    cache: "no-store",
+    cache: 'no-store',
   });
-  if (!res.ok) throw new Error("Crawl not found");
+  if (!res.ok) throw new Error('Crawl not found');
   return res.json();
 }

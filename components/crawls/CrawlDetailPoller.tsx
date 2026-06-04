@@ -63,7 +63,7 @@ const EXPORTS: ExportItem[] = [
   { icon: AlertCircle,     label: "URL Issues",              slug: "url-issues" },
   { icon: Heading,         label: "Page Titles",             slug: "page-titles" },
   { icon: Tag,             label: "Meta Description",        slug: "meta-description" },
-  { icon: Type,            label: "H1" },
+  { icon: Type,            label: "H1",                   slug: "h1" },
   { icon: LinkIcon,        label: "Canonicals" },
   { icon: ShieldCheck,     label: "Directives" },
   { icon: Files,           label: "Sitemaps" },
@@ -146,7 +146,7 @@ export function CrawlDetailPoller({ initial }: { initial: Crawl }) {
 
   const isCompleted = crawl.status === "completed";
   const isRunning = crawl.status === "running" || crawl.status === "queued";
-  const crawlTypeLabel = crawl.crawl_type.replace(/-/g, " ");
+  const crawlTypeLabel = (crawl.crawl_type ?? "").replace(/-/g, " ");
   const subtitleSuffix = isCompleted
     ? `, completed in ${formatDuration(crawl.created_at, crawl.completed_at)}`
     : isRunning
