@@ -74,7 +74,7 @@ const EXPORTS: ExportItem[] = [
   { icon: AlertTriangle,   label: "Content Issues",         slug: "content-issues" },
   { icon: Copy,            label: "Duplicate Content",        slug: "duplicate-content" },
   { icon: BarChart3,       label: "Custom Search GA4 & GTM", slug: "custom-search-ga4-gtm" },
-  { icon: Share2,          label: "Custom Search OG & Twitter" },
+  { icon: Share2,          label: "Custom Search OG & Twitter", slug: "custom-search-og-twitter" },
   { icon: ChevronsRight,   label: "Pagination" },
   { icon: Languages,       label: "Hreflang" },
 ];
