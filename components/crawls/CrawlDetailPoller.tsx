@@ -70,12 +70,13 @@ const EXPORTS: ExportItem[] = [
   { icon: Lock,            label: "Security" },
   { icon: Zap,             label: "Page Speed / CWV" },
   { icon: Code,            label: "Structured Tags" },
-  { icon: Link2,           label: "Internal Links" },
+  { icon: Link2,           label: "Functional Internal Links Analysis" },
+  { icon: Link2,           label: "Non-Functional Internal Links" },
   { icon: AlertTriangle,   label: "Content Issues",         slug: "content-issues" },
   { icon: Copy,            label: "Duplicate Content",        slug: "duplicate-content" },
   { icon: BarChart3,       label: "Custom Search GA4 & GTM", slug: "custom-search-ga4-gtm" },
   { icon: Share2,          label: "Custom Search OG & Twitter", slug: "custom-search-og-twitter" },
-  { icon: ChevronsRight,   label: "Pagination" },
+  { icon: ChevronsRight,   label: "Pagination",          slug: "pagination" },
   { icon: Languages,       label: "Hreflang" },
 ];
 
