@@ -70,7 +70,7 @@ const EXPORTS: ExportItem[] = [
   { icon: Lock,            label: "Security" },
   { icon: Zap,             label: "Page Speed / CWV" },
   { icon: Code,            label: "Structured Tags" },
-  { icon: Link2,           label: "Functional Internal Links Analysis" },
+  { icon: Link2,           label: "Functional Internal Links Analysis", slug: "internal-links-functional" },
   { icon: Link2,           label: "Non-Functional Internal Links" },
   { icon: AlertTriangle,   label: "Content Issues",         slug: "content-issues" },
   { icon: Copy,            label: "Duplicate Content",        slug: "duplicate-content" },
