@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import type { Crawl } from "@/lib/api";
@@ -319,37 +319,52 @@ export function CrawlDetailPoller({ initial }: { initial: Crawl }) {
         </>
       )}
 
-      {/* Client Report — Word doc placeholder until backend endpoint exists.
-          Wire when ready: window.location.href = `${API_URL}/api/crawls/${crawl.id}/download/word`; */}
+      {/* Client Report — 4 buttons, all Coming in V2 */}
       {isCompleted && (
         <div
           className="relative overflow-hidden rounded-2xl border bg-white"
           style={{ borderColor: "#F4D2D4", boxShadow: "0 4px 14px rgba(17,24,39,0.06), 0 16px 36px rgba(17,24,39,0.08)" }}
         >
           <div style={{ height: 3, background: "linear-gradient(90deg, #DE1921, #A6131A)" }} />
-          <div className="flex flex-wrap items-center justify-between gap-6 p-6">
-            <div className="flex items-center gap-4">
+          <div className="p-6">
+            <div className="flex items-center gap-4 mb-6">
               <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-ru-red/10">
                 <FileType size={26} className="text-ru-red" strokeWidth={2.2} />
               </span>
               <div>
                 <div className="text-xs font-bold uppercase tracking-wider text-ru-red">Client Report</div>
-                <div className="mt-1 text-xl font-bold tracking-tight text-neutral-dark">Word Document</div>
+                <div className="mt-1 text-xl font-bold tracking-tight text-neutral-dark">Download Reports</div>
                 {crawl.completed_at && (
-                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-ru-grey/10 px-2.5 py-1 text-[11px] font-medium text-ru-grey">
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-ru-grey/10 px-2.5 py-1 text-[11px] font-medium text-ru-grey">
                     <Calendar size={11} strokeWidth={2.3} />
                     Generated on {formatDate(crawl.completed_at)}
                   </div>
                 )}
               </div>
             </div>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-lg bg-ru-red px-5 py-3 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-90"
-            >
-              <Download size={16} strokeWidth={2.4} />
-              Download Report
-            </button>
+            <div className="flex flex-wrap gap-4">
+              {[
+                { label: "Masterfile", icon: FileText },
+                { label: "Word Document", icon: FileType },
+                { label: "PPT", icon: Layers },
+                { label: "Raw File", icon: Folder },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.label} className="flex flex-col items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled
+                      className="inline-flex items-center gap-2 rounded-lg border border-ru-grey/20 bg-ru-grey/5 px-5 py-2.5 text-sm font-semibold text-ru-grey cursor-not-allowed opacity-60"
+                    >
+                      <Icon size={15} strokeWidth={2.2} />
+                      {item.label}
+                    </button>
+                    <span className="text-[10px] font-medium text-ru-grey/60 bg-ru-grey/10 rounded px-1.5 py-0.5">Coming in V2</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
