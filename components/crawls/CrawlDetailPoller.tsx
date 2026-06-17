@@ -64,7 +64,7 @@ const EXPORTS: ExportItem[] = [
   { icon: Heading,         label: "Page Titles",             slug: "page-titles" },
   { icon: Tag,             label: "Meta Description",        slug: "meta-description" },
   { icon: Type,            label: "H1",                   slug: "h1" },
-  { icon: LinkIcon,        label: "Canonicals" },
+  { icon: LinkIcon,        label: "Canonicals", slug: "canonicals" },
   { icon: ShieldCheck,     label: "Directives",          slug: "directives" },
   { icon: Files,           label: "Sitemaps",                slug: "sitemaps" },
   { icon: Lock,            label: "Security" },
