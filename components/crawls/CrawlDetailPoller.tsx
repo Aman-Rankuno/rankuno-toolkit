@@ -78,6 +78,7 @@ const EXPORTS: ExportItem[] = [
   { icon: Share2,          label: "Custom Search OG & Twitter", slug: "custom-search-og-twitter" },
   { icon: ChevronsRight,   label: "Pagination",          slug: "pagination" },
   { icon: Languages,       label: "Hreflang" },
+  { icon: FileText,        label: "Lorem Ipsum" },
 ];
 
 // Status pill styled for the red hero (white background, coloured text + dot).
