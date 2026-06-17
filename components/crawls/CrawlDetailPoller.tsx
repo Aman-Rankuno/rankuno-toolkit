@@ -59,7 +59,7 @@ type ExportItem = {
 };
 
 const EXPORTS: ExportItem[] = [
-  { icon: FileBarChart,     label: "Overview Report" },
+  { icon: BarChart3,       label: "Overview Report" },
   { icon: FileText,        label: "Response Codes Internal", slug: "response-codes-internal" },
   { icon: AlertCircle,     label: "URL Issues",              slug: "url-issues" },
   { icon: Heading,         label: "Page Titles",             slug: "page-titles" },
