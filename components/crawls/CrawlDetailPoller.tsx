@@ -344,7 +344,7 @@ export function CrawlDetailPoller({ initial }: { initial: Crawl }) {
             </div>
             <div className="flex flex-wrap gap-4">
               {[
-                { label: "Masterfile", icon: FileText },
+                { label: "Masterfile", icon: FileText, slug: "all" },
                 { label: "Word Document", icon: FileType },
                 { label: "PPT", icon: Layers },
                 { label: "Raw File", icon: Folder },
@@ -352,14 +352,25 @@ export function CrawlDetailPoller({ initial }: { initial: Crawl }) {
                 const Icon = item.icon;
                 return (
                   <div key={item.label} className="flex flex-col items-center gap-1.5">
-                    <button
-                      type="button"
-                      disabled
-                      className="inline-flex items-center gap-2 rounded-lg border border-ru-grey/20 bg-ru-grey/5 px-5 py-2.5 text-sm font-semibold text-ru-grey cursor-not-allowed opacity-60"
-                    >
-                      <Icon size={15} strokeWidth={2.2} />
-                      {item.label}
-                    </button>
+                    {item.slug ? (
+                      <a
+                        href={`${API_URL}/api/crawls/${crawl.id}/download/masterfile/${item.slug}`}
+                        download
+                        className="inline-flex items-center gap-2 rounded-lg border border-ru-red bg-ru-red px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                      >
+                        <Icon size={15} strokeWidth={2.2} />
+                        {item.label}
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled
+                        className="inline-flex items-center gap-2 rounded-lg border border-ru-grey/20 bg-ru-grey/5 px-5 py-2.5 text-sm font-semibold text-ru-grey cursor-not-allowed opacity-60"
+                      >
+                        <Icon size={15} strokeWidth={2.2} />
+                        {item.label}
+                      </button>
+                    )}
                     <span className="text-[10px] font-medium text-ru-grey/60 bg-ru-grey/10 rounded px-1.5 py-0.5">Coming in V2</span>
                   </div>
                 );
