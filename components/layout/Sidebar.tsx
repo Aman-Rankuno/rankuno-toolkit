@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, GitCompare, Sparkles, ChevronsUpDown } from "lucide-react";
+import { LayoutGrid, GitCompare, Sparkles, ChevronsUpDown, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NewCrawlTrigger } from "@/components/dashboard/NewCrawlTrigger";
 
@@ -11,7 +11,7 @@ type NavItem = {
   label: string;
   href: string;
   icon: React.ElementType;
-  status?: "active" | "soon";
+  status?: "active" | "soon" | "v2";
 };
 
 const primaryNav: NavItem[] = [
@@ -20,7 +20,8 @@ const primaryNav: NavItem[] = [
 
 const secondaryNav: NavItem[] = [
   { label: "Comparisons", href: "#", icon: GitCompare, status: "soon" },
-  { label: "Analysis", href: "#", icon: Sparkles, status: "soon" }
+  { label: "Analysis", href: "#", icon: Sparkles, status: "soon" },
+  { label: "Chat with AI", href: "#", icon: MessageSquare, status: "v2" }
 ];
 
 function NavList({ items }: { items: NavItem[] }) {
@@ -30,6 +31,7 @@ function NavList({ items }: { items: NavItem[] }) {
       {items.map((item) => {
         const isActive = item.href === pathname;
         const isSoon = item.status === "soon";
+        const isV2 = item.status === "v2";
         const Icon = item.icon;
         return (
           <li key={item.label}>
@@ -42,7 +44,8 @@ function NavList({ items }: { items: NavItem[] }) {
                 isActive &&
                   "bg-ru-red/10 text-ru-red before:absolute before:left-0 before:top-1/2 before:h-4 before:w-1 before:-translate-y-1/2 before:rounded-r-full before:bg-ru-red before:content-['']",
                 !isActive && !isSoon && "text-neutral-dark hover:bg-ru-grey/10",
-                isSoon && "cursor-not-allowed text-ru-grey/60"
+                isSoon && "cursor-not-allowed text-ru-grey/60",
+                isV2 && "cursor-not-allowed text-ru-grey/60"
               )}
             >
               <Icon className="h-4 w-4 shrink-0" strokeWidth={2} />
@@ -50,6 +53,11 @@ function NavList({ items }: { items: NavItem[] }) {
               {isSoon && (
                 <span className="rounded-md bg-beige px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-ru-grey">
                   Soon
+                </span>
+              )}
+              {isV2 && (
+                <span className="rounded-md bg-ru-red/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-ru-red">
+                  V2
                 </span>
               )}
             </Link>

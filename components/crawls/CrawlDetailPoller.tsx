@@ -71,7 +71,7 @@ const EXPORTS: ExportItem[] = [
   { icon: Zap,             label: "Page Speed / CWV" },
   { icon: Code,            label: "Structured Tags" },
   { icon: Link2,           label: "Functional Internal Links Analysis", slug: "internal-links-functional" },
-  { icon: Link2,           label: "Non-Functional Internal Links" },
+  { icon: Link2,           label: "Non-Functional Internal Links", slug: "internal-links-non-functional" },
   { icon: AlertTriangle,   label: "Content Issues",         slug: "content-issues" },
   { icon: Copy,            label: "Duplicate Content",        slug: "duplicate-content" },
   { icon: BarChart3,       label: "Custom Search GA4 & GTM", slug: "custom-search-ga4-gtm" },
