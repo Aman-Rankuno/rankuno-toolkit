@@ -347,7 +347,7 @@ export function CrawlDetailPoller({ initial }: { initial: Crawl }) {
                 { label: "Masterfile", icon: FileText, slug: "all" },
                 { label: "Word Document", icon: FileType },
                 { label: "PPT", icon: Layers },
-                { label: "Raw File", icon: Folder },
+                { label: "Raw File", icon: Folder, slug: "raw-zip" },
               ].map((item) => {
                 const Icon = item.icon;
                 return (
