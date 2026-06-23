@@ -78,7 +78,7 @@ const EXPORTS: ExportItem[] = [
   { icon: BarChart3,       label: "Custom Search GA4 & GTM", slug: "custom-search-ga4-gtm" },
   { icon: Share2,          label: "Custom Search OG & Twitter", slug: "custom-search-og-twitter" },
   { icon: ChevronsRight,   label: "Pagination",          slug: "pagination" },
-  { icon: Languages,       label: "Hreflang" },
+  { icon: Languages,       label: "Hreflang", slug: "hreflang" },
   { icon: FileText,        label: "Lorem Ipsum", slug: "lorem-ipsum" },
 ];
 
