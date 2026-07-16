@@ -21,7 +21,7 @@ const primaryNav: NavItem[] = [
 const secondaryNav: NavItem[] = [
   { label: "Comparisons", href: "#", icon: GitCompare, status: "soon" },
   { label: "Analysis", href: "#", icon: Sparkles, status: "soon" },
-  { label: "Chat with AI", href: "#", icon: MessageSquare, status: "v2" }
+  { label: "Chat with AI", href: "/chat", icon: MessageSquare }
 ];
 
 function NavList({ items }: { items: NavItem[] }) {
