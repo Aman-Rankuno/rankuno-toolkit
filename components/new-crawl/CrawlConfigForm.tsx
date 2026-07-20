@@ -1,5 +1,5 @@
 "use client";
- 
+
 import { useState, useRef, useEffect } from "react";
 import {
   ChevronDown,
@@ -10,10 +10,12 @@ import {
   Key,
   PlayCircle,
   Search,
+  Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CrawlConfig, CrawlSource } from "./NewCrawlForm";
 import { TARGET_DOMAINS } from "./domains";
+import { fetchConfigs, uploadConfig, type ConfigEntry } from "@/lib/api";
 
 const GA4_EMAILS = [
   "DHLS",
@@ -36,8 +38,9 @@ const GSC_EMAILS = [
   "sutrishna@serialscaling.com",
 ];
 
-const SF_CONFIGS = [
-  { value: "", label: "Default" },
+// Fallback list used only if the configs API is unreachable, so the form
+// still works during a backend restart. Matches the presets on disk.
+const SF_CONFIGS_FALLBACK = [
   { value: "SEO Spider Config - Basic.seospiderconfig", label: "Basic" },
   { value: "SEO Spider Config - Basic with URL parameter.seospiderconfig", label: "Basic (URL Parameter)" },
   { value: "SEO Spider Config - Advance.seospiderconfig", label: "Advanced" },
@@ -45,6 +48,11 @@ const SF_CONFIGS = [
   { value: "SEO Spider Config - Java Script.seospiderconfig", label: "JS Crawl" },
   { value: "SEO Spider Config - Java Script with URL parameter.seospiderconfig", label: "JS Crawl (URL Parameter)" },
 ];
+
+// Strip the shared filename prefix for friendlier preset labels
+function presetLabel(name: string): string {
+  return name.replace(/^SEO Spider Config - /i, "");
+}
 
 const DEVICES = ["Desktop", "Mobile", "Tablet"];
 
@@ -77,6 +85,47 @@ export function CrawlConfigForm({
   const [openSections, setOpenSections] = useState<AccordionKey[]>(["target"]);
   const isFullSite = source === "full-site";
 
+  // Config library state
+  const [presetConfigs, setPresetConfigs] = useState<ConfigEntry[]>([]);
+  const [customConfigs, setCustomConfigs] = useState<ConfigEntry[]>([]);
+  const [configsLoaded, setConfigsLoaded] = useState(false);
+
+  // Upload state
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadName, setUploadName] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [uploadSuccess, setUploadSuccess] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchConfigs()
+      .then((data) => {
+        if (cancelled) return;
+        setPresetConfigs(data.presets);
+        setCustomConfigs(data.custom.filter((c) => !c.missing_on_disk));
+        setConfigsLoaded(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        // API unreachable: fall back to the static preset list
+        setPresetConfigs(
+          SF_CONFIGS_FALLBACK.map((c) => ({
+            id: c.value,
+            name: c.label,
+            kind: "preset" as const,
+            config_file: c.value,
+          }))
+        );
+        setConfigsLoaded(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   function toggleSection(key: AccordionKey) {
     setOpenSections((prev) =>
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
@@ -89,6 +138,39 @@ export function CrawlConfigForm({
 
   function set(field: keyof CrawlConfig, value: string | null) {
     onChange({ ...config, [field]: value });
+  }
+
+  async function handleUpload() {
+    setUploadError("");
+    setUploadSuccess("");
+    if (!uploadFile) {
+      setUploadError("Choose a .seospiderconfig file first.");
+      return;
+    }
+    if (!uploadFile.name.toLowerCase().endsWith(".seospiderconfig")) {
+      setUploadError("File must be a .seospiderconfig exported from Screaming Frog.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const result = await uploadConfig(uploadFile, uploadName.trim());
+      // Refresh the library and auto-select the new config
+      const data = await fetchConfigs();
+      setPresetConfigs(data.presets);
+      setCustomConfigs(data.custom.filter((c) => !c.missing_on_disk));
+      set("configFile", result.config_file);
+      setUploadSuccess(`"${result.name}" uploaded and selected.`);
+      setUploadFile(null);
+      setUploadName("");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setShowUpload(false);
+    } catch (e) {
+      setUploadError(
+        e instanceof Error ? e.message : "Upload failed. Check the backend is running."
+      );
+    } finally {
+      setUploading(false);
+    }
   }
 
   function handleStart() {
@@ -106,7 +188,15 @@ export function CrawlConfigForm({
   const targetComplete = isFullSite
     ? config.domain.trim().length > 0
     : config.urls.trim().length > 0;
-  const selectedSfConfig = SF_CONFIGS.find((c) => c.value === config.configFile);
+
+  const selectedConfigEntry =
+    presetConfigs.find((c) => c.config_file === config.configFile) ||
+    customConfigs.find((c) => c.config_file === config.configFile);
+  const selectedConfigLabel = selectedConfigEntry
+    ? selectedConfigEntry.kind === "preset"
+      ? presetLabel(selectedConfigEntry.name)
+      : selectedConfigEntry.name
+    : "";
 
   const summaryParts: string[] = [];
   if (isFullSite && config.domain.trim()) {
@@ -115,17 +205,14 @@ export function CrawlConfigForm({
     const lines = config.urls.trim().split("\n").filter(Boolean).length;
     if (lines > 0) summaryParts.push(`${lines} URL${lines === 1 ? "" : "s"}`);
   }
-  if (selectedSfConfig && selectedSfConfig.label !== "Default")
-    summaryParts.push(selectedSfConfig.label);
+  if (selectedConfigLabel) summaryParts.push(selectedConfigLabel);
   if (config.gscEmail.trim() && config.gscProperty.trim())
     summaryParts.push("GSC linked");
   if (config.gaAccount.trim() && config.ga4Account.trim() && config.ga4Property.trim() && config.ga4Stream.trim())
-  summaryParts.push("GA4 linked");
-  
+    summaryParts.push("GA4 linked");
 
   return (
     <div className="flex flex-col gap-8 sm:gap-10">
-      {/* 02 — Screaming Frog Configuration */}
       {/* 01 — Target */}
       <div>
         <SectionHeader
@@ -134,8 +221,8 @@ export function CrawlConfigForm({
           complete={targetComplete}
         />
         <div className="mt-3 sm:mt-4">
-            {isFullSite ? (
-          <DomainDropdown
+          {isFullSite ? (
+            <DomainDropdown
               value={config.domain}
               options={TARGET_DOMAINS}
               onChange={(val) => set("domain", val)}
@@ -156,20 +243,120 @@ export function CrawlConfigForm({
           </p>
         </div>
       </div>
+
+      {/* 02 — Screaming Frog Configuration */}
       <div className="mt-8">
         <SectionHeader number="02" title="Screaming Frog Configuration" complete={true} />
         <div className="mt-3 sm:mt-4">
           <select
             value={config.configFile}
             onChange={(e) => set("configFile", e.target.value)}
-            className="w-full rounded-md border border-ru-grey/25 bg-white px-3 py-3 text-sm font-medium text-neutral-dark focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+            disabled={!configsLoaded}
+            className="w-full rounded-md border border-ru-grey/25 bg-white px-3 py-3 text-sm font-medium text-neutral-dark focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20 disabled:opacity-60"
           >
-            {SF_CONFIGS.map((cfg) => (
-              <option key={cfg.value} value={cfg.value}>
-                {cfg.label}
-              </option>
-            ))}
+            <option value="">Default</option>
+            {presetConfigs.length > 0 && (
+              <optgroup label="Presets">
+                {presetConfigs.map((cfg) => (
+                  <option key={cfg.id} value={cfg.config_file}>
+                    {presetLabel(cfg.name)}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+            {customConfigs.length > 0 && (
+              <optgroup label="Custom Uploads">
+                {customConfigs.map((cfg) => (
+                  <option key={cfg.id} value={cfg.config_file}>
+                    {cfg.name}
+                  </option>
+                ))}
+              </optgroup>
+            )}
           </select>
+
+          {/* Upload custom config */}
+          <div className="mt-2">
+            {!showUpload ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowUpload(true);
+                  setUploadError("");
+                  setUploadSuccess("");
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-ru-red hover:underline"
+              >
+                <Upload className="h-3.5 w-3.5" strokeWidth={2} />
+                Upload custom config
+              </button>
+            ) : (
+              <div className="rounded-lg border border-ru-grey/20 bg-ru-grey/5 p-3">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ru-grey">
+                  Upload custom config
+                </p>
+                <div className="flex flex-col gap-2.5">
+                  <div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".seospiderconfig"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0] ?? null;
+                        setUploadFile(f);
+                        setUploadError("");
+                        if (f && !uploadName.trim()) {
+                          setUploadName(f.name.replace(/\.seospiderconfig$/i, ""));
+                        }
+                      }}
+                      className="w-full text-xs text-neutral-dark file:mr-3 file:rounded-md file:border-0 file:bg-ru-red/10 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-ru-red hover:file:bg-ru-red/20"
+                    />
+                    <p className="mt-1 text-[11px] text-ru-grey">
+                      Must be saved from Screaming Frog 19.x via File, Configuration, Save As.
+                    </p>
+                  </div>
+                  <input
+                    type="text"
+                    value={uploadName}
+                    onChange={(e) => setUploadName(e.target.value)}
+                    placeholder="Display name, e.g. Manulife SG JS Crawl"
+                    className="w-full rounded-md border border-ru-grey/25 bg-white px-3 py-2 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+                  />
+                  {uploadError && (
+                    <p className="text-xs text-ru-red">{uploadError}</p>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleUpload}
+                      disabled={uploading || !uploadFile}
+                      className="rounded-md bg-ru-red px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-accent-red disabled:opacity-50"
+                    >
+                      {uploading ? "Uploading..." : "Upload"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowUpload(false);
+                        setUploadError("");
+                        setUploadFile(null);
+                        setUploadName("");
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+                      }}
+                      className="rounded-md px-3 py-1.5 text-xs font-medium text-ru-grey hover:bg-ru-grey/10"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            {uploadSuccess && (
+              <p className="mt-1.5 text-xs font-medium text-emerald-700">
+                {uploadSuccess}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -217,74 +404,75 @@ export function CrawlConfigForm({
           </AccordionSection>
 
           <AccordionSection
-  label="Google Analytics 4"
-  icon={Key}
-  sectionKey="apis"
-  isOpen={isOpen("apis")}
-  onToggle={() => toggleSection("apis")}
-  complete={
-    config.gaAccount.trim().length > 0 &&
-    config.ga4Account.trim().length > 0 &&
-    config.ga4Property.trim().length > 0 &&
-    config.ga4Stream.trim().length > 0
-  }
->
-  <div className="flex flex-col gap-3">
-    <div>
-      <label className="mb-1 block text-xs font-medium text-ru-grey">Gmail Account</label>
-      <EmailDropdown
-        value={config.gaAccount}
-        options={GA4_EMAILS}
-        onChange={(val) => set("gaAccount", val)}
-      />
-      <p className="mt-1.5 mb-2 text-xs text-ru-grey">
-        The Google account label as it appears in Screaming Frog. Same as the GSC field above if both use one login.
-      </p>
-    </div>
+            label="Google Analytics 4"
+            icon={Key}
+            sectionKey="apis"
+            isOpen={isOpen("apis")}
+            onToggle={() => toggleSection("apis")}
+            complete={
+              config.gaAccount.trim().length > 0 &&
+              config.ga4Account.trim().length > 0 &&
+              config.ga4Property.trim().length > 0 &&
+              config.ga4Stream.trim().length > 0
+            }
+          >
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-ru-grey">Gmail Account</label>
+                <EmailDropdown
+                  value={config.gaAccount}
+                  options={GA4_EMAILS}
+                  onChange={(val) => set("gaAccount", val)}
+                />
+                <p className="mt-1.5 mb-2 text-xs text-ru-grey">
+                  The Google account label as it appears in Screaming Frog. Same as the GSC field above if both use one login.
+                </p>
+              </div>
 
-    <div>
-      <label className="mb-1 block text-xs font-medium text-ru-grey">GA4 Account</label>
-      <input
-        type="text"
-        value={config.ga4Account}
-        onChange={(e) => set("ga4Account", e.target.value)}
-        placeholder="RankUno"
-        className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
-      />
-      <p className="mt-1.5 text-xs text-ru-grey">
-        GA4 Account name, exactly as it appears in the SF Account dropdown.
-      </p>
-    </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-ru-grey">GA4 Account</label>
+                <input
+                  type="text"
+                  value={config.ga4Account}
+                  onChange={(e) => set("ga4Account", e.target.value)}
+                  placeholder="RankUno"
+                  className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+                />
+                <p className="mt-1.5 text-xs text-ru-grey">
+                  GA4 Account name, exactly as it appears in the SF Account dropdown.
+                </p>
+              </div>
 
-    <div>
-      <label className="mb-1 block text-xs font-medium text-ru-grey">GA4 Property</label>
-      <input
-        type="text"
-        value={config.ga4Property}
-        onChange={(e) => set("ga4Property", e.target.value)}
-        placeholder="RankUno (New Reporting)"
-        className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
-      />
-      <p className="mt-1.5 text-xs text-ru-grey">
-        Property label, not the numeric ID. Copy verbatim from the SF Property dropdown.
-      </p>
-    </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-ru-grey">GA4 Property</label>
+                <input
+                  type="text"
+                  value={config.ga4Property}
+                  onChange={(e) => set("ga4Property", e.target.value)}
+                  placeholder="RankUno (New Reporting)"
+                  className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+                />
+                <p className="mt-1.5 text-xs text-ru-grey">
+                  Property label, not the numeric ID. Copy verbatim from the SF Property dropdown.
+                </p>
+              </div>
 
-    <div>
-      <label className="mb-1 block text-xs font-medium text-ru-grey">GA4 Data Stream</label>
-      <input
-        type="text"
-        value={config.ga4Stream}
-        onChange={(e) => set("ga4Stream", e.target.value)}
-        placeholder="rankuno.com"
-        className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
-      />
-      <p className="mt-1.5 text-xs text-ru-grey">
-        Data Stream label from the SF Data Stream dropdown.
-      </p>
-    </div>
-  </div>
-</AccordionSection>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-ru-grey">GA4 Data Stream</label>
+                <input
+                  type="text"
+                  value={config.ga4Stream}
+                  onChange={(e) => set("ga4Stream", e.target.value)}
+                  placeholder="rankuno.com"
+                  className="w-full rounded-md border border-ru-grey/25 px-3 py-2.5 text-sm text-neutral-dark placeholder:text-ru-grey/40 focus:border-ru-red focus:outline-none focus:ring-2 focus:ring-ru-red/20"
+                />
+                <p className="mt-1.5 text-xs text-ru-grey">
+                  Data Stream label from the SF Data Stream dropdown.
+                </p>
+              </div>
+            </div>
+          </AccordionSection>
+
           <AccordionSection
             label="Google Search Console"
             icon={LineChart}
@@ -400,7 +588,6 @@ export function CrawlConfigForm({
         </div>
       </div>
 
-      {/* Summary + Start */}
       {/* Summary + Start */}
       <div className="rounded-xl border border-ru-grey/20 bg-white p-5 sm:p-6 lg:p-7 shadow-lg">
         <div className="mb-4 flex items-start gap-3">
@@ -530,131 +717,81 @@ function AccordionSection({
 }
 
 /* ============================================================
-
    Custom Domain Dropdown
-
    Opens DOWN, searchable, fully styled (no native <select>)
-
    ============================================================ */
-
 function DomainDropdown({
-
   value,
-
   options,
-
   onChange,
-
 }: {
-
   value: string;
-
   options: string[];
-
   onChange: (val: string) => void;
-
 }) {
-
   const [open, setOpen] = useState(false);
-
   const [search, setSearch] = useState("");
-
   const wrapRef = useRef<HTMLDivElement>(null);
- 
+
   useEffect(() => {
-
     function handleClickOutside(e: MouseEvent) {
-
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
-
         setOpen(false);
-
         setSearch("");
-
       }
-
     }
-
     if (open) document.addEventListener("mousedown", handleClickOutside);
-
     return () => document.removeEventListener("mousedown", handleClickOutside);
-
   }, [open]);
- 
+
   const filtered = search
-
     ? options.filter((url) => url.toLowerCase().includes(search.toLowerCase()))
-
     : options;
- 
+
   return (
-<div ref={wrapRef} className="relative w-full">
-<button
-
+    <div ref={wrapRef} className="relative w-full">
+      <button
         type="button"
-
         onClick={() => setOpen((o) => !o)}
-
         className={cn(
-
           "flex w-full items-center justify-between rounded-md border bg-white px-3 py-3 text-left text-sm transition-colors",
-
           open ? "border-ru-red ring-2 ring-ru-red/20" : "border-ru-grey/25 hover:border-ru-grey/40",
-
           value ? "font-medium text-neutral-dark" : "text-ru-grey/60"
-
         )}
->
-<span className="truncate">{value || "Select a domain..."}</span>
-<ChevronDown
-
+      >
+        <span className="truncate">{value || "Select a domain..."}</span>
+        <ChevronDown
           className={cn(
-
             "ml-2 h-4 w-4 shrink-0 text-ru-grey transition-transform",
-
             open && "rotate-180"
-
           )}
-
           strokeWidth={2}
-
         />
-</button>
- 
+      </button>
+
       {open && (
-<div className="absolute left-0 top-full z-50 mt-1.5 w-full overflow-hidden rounded-lg border border-ru-grey/20 bg-white shadow-xl">
-
+        <div className="absolute left-0 top-full z-50 mt-1.5 w-full overflow-hidden rounded-lg border border-ru-grey/20 bg-white shadow-xl">
           {/* Search input */}
-<div className="border-b border-ru-grey/10 p-2">
-<div className="relative">
-<Search
-
+          <div className="border-b border-ru-grey/10 p-2">
+            <div className="relative">
+              <Search
                 className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ru-grey"
-
                 strokeWidth={2}
-
               />
-<input
-
+              <input
                 autoFocus
-                
                 autoComplete="off"
                 type="text"
-
                 value={search}
-
                 onChange={(e) => setSearch(e.target.value)}
-
                 placeholder="Search domains..."
-
                 className="w-full rounded-md border border-ru-grey/15 bg-ru-grey/5 py-2 pl-8 pr-3 text-sm text-neutral-dark placeholder:text-ru-grey/50 focus:border-ru-red focus:bg-white focus:outline-none"
-
               />
-</div>
-</div>
- 
+            </div>
+          </div>
+
           {/* Options list */}
-<div className="max-h-72 overflow-y-auto py-1">
+          <div className="max-h-72 overflow-y-auto py-1">
             {filtered.length === 0 ? (
               <button
                 type="button"
@@ -695,20 +832,16 @@ function DomainDropdown({
                 })}
               </>
             )}
-</div>
- 
+          </div>
+
           {/* Footer count */}
-<div className="border-t border-ru-grey/10 bg-ru-grey/5 px-3 py-1.5 text-[11px] font-medium text-ru-grey">
-
+          <div className="border-t border-ru-grey/10 bg-ru-grey/5 px-3 py-1.5 text-[11px] font-medium text-ru-grey">
             {filtered.length} of {options.length} domains
-</div>
-</div>
-
+          </div>
+        </div>
       )}
-</div>
-
+    </div>
   );
-
 }
 
 /* ============================================================

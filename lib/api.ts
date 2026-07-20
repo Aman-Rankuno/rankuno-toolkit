@@ -2,7 +2,6 @@ const API_URL =
   typeof window === "undefined"
     ? process.env.API_URL_SERVER || "http://localhost:8000"
     : process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 export type CrawlStatus = 'queued' | 'running' | 'completed' | 'failed';
 export type CrawlPipelineState = {
   crawl: 'pending' | 'running' | 'done' | 'failed';
@@ -68,5 +67,62 @@ export async function fetchCrawl(id: string): Promise<Crawl> {
     cache: 'no-store',
   });
   if (!res.ok) throw new Error('Crawl not found');
+  return res.json();
+}
+
+/* ============================================================
+   Screaming Frog config library
+   ============================================================ */
+export type ConfigEntry = {
+  id: string;
+  name: string;
+  kind: 'preset' | 'custom';
+  config_file: string;
+  original_filename?: string;
+  uploaded_at?: string;
+  size_bytes?: number | null;
+  missing_on_disk?: boolean;
+};
+export type ConfigList = {
+  presets: ConfigEntry[];
+  custom: ConfigEntry[];
+};
+export async function fetchConfigs(): Promise<ConfigList> {
+  const res = await fetch(`${API_URL}/api/configs/`, {
+    cache: 'no-store',
+  });
+  if (!res.ok) throw new Error('Failed to fetch configs');
+  return res.json();
+}
+export async function uploadConfig(
+  file: File,
+  name: string
+): Promise<{ id: string; name: string; config_file: string; message: string }> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('name', name);
+  const res = await fetch(`${API_URL}/api/configs/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!res.ok) {
+    let detail = 'Failed to upload config';
+    try {
+      const body = await res.json();
+      if (body?.detail) detail = body.detail;
+    } catch {
+      /* keep default message */
+    }
+    throw new Error(detail);
+  }
+  return res.json();
+}
+export async function deleteConfig(
+  id: string
+): Promise<{ id: string; deleted: boolean }> {
+  const res = await fetch(`${API_URL}/api/configs/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Failed to delete config');
   return res.json();
 }
