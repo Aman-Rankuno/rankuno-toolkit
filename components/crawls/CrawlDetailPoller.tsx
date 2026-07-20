@@ -68,7 +68,7 @@ const EXPORTS: ExportItem[] = [
   { icon: LinkIcon,        label: "Canonicals", slug: "canonicals" },
   { icon: ShieldCheck,     label: "Directives",          slug: "directives" },
   { icon: Files,           label: "Sitemaps",                slug: "sitemaps" },
-  { icon: Lock,            label: "Security" },
+  { icon: Lock,            label: "Security", slug: "security" },
   { icon: Zap,             label: "Page Speed / CWV" },
   { icon: Code,            label: "Structured Tags" },
   { icon: Link2,           label: "Functional Internal Links Analysis", slug: "internal-links-functional" },
