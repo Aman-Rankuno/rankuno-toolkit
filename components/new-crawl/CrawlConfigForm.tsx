@@ -11,14 +11,16 @@ import {
   PlayCircle,
   Search,
   Upload,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CrawlConfig, CrawlSource } from "./NewCrawlForm";
 import { TARGET_DOMAINS } from "./domains";
-import { fetchConfigs, uploadConfig, type ConfigEntry } from "@/lib/api";
+import { fetchConfigs, uploadConfig, deleteConfig, type ConfigEntry } from "@/lib/api";
 
 const GA4_EMAILS = [
   "DHLS",
+  "Manoj-DHLS",
   "Rankuno",
   "access@rankuno.com",
   "analysis@serialscaling.com",
@@ -29,6 +31,7 @@ const GA4_EMAILS = [
 
 const GSC_EMAILS = [
   "DHLS",
+  "Manoj-DHLS",
   "Rankuno.com",
   "access@rankuno.com",
   "analysis@serialscaling.com",
@@ -92,6 +95,9 @@ export function CrawlConfigForm({
 
   // Upload state
   const [showUpload, setShowUpload] = useState(false);
+  const [showManage, setShowManage] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [manageError, setManageError] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadName, setUploadName] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -170,6 +176,31 @@ export function CrawlConfigForm({
       );
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function handleDelete(cfg: ConfigEntry) {
+    const ok = window.confirm(
+      `Delete "${cfg.name}"? Past crawls that used it keep their saved configuration, but it will no longer be selectable for new crawls.`
+    );
+    if (!ok) return;
+    setManageError("");
+    setDeletingId(cfg.id);
+    try {
+      await deleteConfig(cfg.id);
+      const data = await fetchConfigs();
+      setPresetConfigs(data.presets);
+      setCustomConfigs(data.custom.filter((c) => !c.missing_on_disk));
+      // If the deleted config was selected, fall back to Default
+      if (config.configFile === cfg.config_file) {
+        set("configFile", "");
+      }
+    } catch (e) {
+      setManageError(
+        e instanceof Error ? e.message : "Delete failed. Check the backend is running."
+      );
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -278,18 +309,39 @@ export function CrawlConfigForm({
           {/* Upload custom config */}
           <div className="mt-2">
             {!showUpload ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setShowUpload(true);
-                  setUploadError("");
-                  setUploadSuccess("");
-                }}
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-ru-red hover:underline"
-              >
-                <Upload className="h-3.5 w-3.5" strokeWidth={2} />
-                Upload custom config
-              </button>
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowUpload(true);
+                    setShowManage(false);
+                    setUploadError("");
+                    setUploadSuccess("");
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-ru-red/40 bg-ru-red/5 px-3 py-2 text-xs font-semibold text-ru-red transition-colors hover:bg-ru-red hover:text-white"
+                >
+                  <Upload className="h-3.5 w-3.5" strokeWidth={2} />
+                  Upload custom config
+                </button>
+                {customConfigs.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowManage((v) => !v);
+                      setManageError("");
+                    }}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-xs font-semibold transition-colors",
+                      showManage
+                        ? "border-ru-grey/40 bg-ru-grey/15 text-neutral-dark"
+                        : "border-ru-grey/30 bg-white text-ru-grey hover:border-ru-grey/50 hover:text-neutral-dark"
+                    )}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+                    {showManage ? "Close manage" : "Manage uploads"}
+                  </button>
+                )}
+              </div>
             ) : (
               <div className="rounded-lg border border-ru-grey/20 bg-ru-grey/5 p-3">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ru-grey">
@@ -355,6 +407,48 @@ export function CrawlConfigForm({
               <p className="mt-1.5 text-xs font-medium text-emerald-700">
                 {uploadSuccess}
               </p>
+            )}
+
+            {/* Manage uploaded configs */}
+            {showManage && !showUpload && customConfigs.length > 0 && (
+              <div className="mt-2 rounded-lg border border-ru-grey/20 bg-ru-grey/5 p-3">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ru-grey">
+                  Uploaded configs
+                </p>
+                <div className="flex flex-col gap-1.5">
+                  {customConfigs.map((cfg) => (
+                    <div
+                      key={cfg.id}
+                      className="flex items-center justify-between gap-3 rounded-md border border-ru-grey/15 bg-white px-3 py-2"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-neutral-dark">
+                          {cfg.name}
+                        </p>
+                        <p className="truncate text-[11px] text-ru-grey">
+                          {cfg.original_filename}
+                          {cfg.size_bytes != null &&
+                            ` · ${Math.round(cfg.size_bytes / 1024)} KB`}
+                          {cfg.uploaded_at &&
+                            ` · ${new Date(cfg.uploaded_at).toLocaleDateString()}`}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(cfg)}
+                        disabled={deletingId === cfg.id}
+                        title="Delete this config"
+                        className="shrink-0 rounded-md p-1.5 text-ru-grey transition-colors hover:bg-ru-red/10 hover:text-ru-red disabled:opacity-50"
+                      >
+                        <Trash2 className="h-4 w-4" strokeWidth={2} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {manageError && (
+                  <p className="mt-2 text-xs text-ru-red">{manageError}</p>
+                )}
+              </div>
             )}
           </div>
         </div>

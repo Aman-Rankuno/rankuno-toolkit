@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, GitCompare, Sparkles, ChevronsUpDown, MessageSquare } from "lucide-react";
+import { LayoutGrid, GitCompare, Sparkles, ChevronsUpDown, MessageSquare, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NewCrawlTrigger } from "@/components/dashboard/NewCrawlTrigger";
 
@@ -22,6 +22,12 @@ const secondaryNav: NavItem[] = [
   { label: "Comparisons", href: "#", icon: GitCompare, status: "soon" },
   { label: "Analysis", href: "#", icon: Sparkles, status: "soon" },
   { label: "Chat with AI", href: "/chat", icon: MessageSquare }
+];
+
+// Restricted-access tools: kept visually separate from the main menu since
+// they require a login of their own, distinct from the rest of the toolkit
+const restrictedNav: NavItem[] = [
+  { label: "Import Crawl", href: "/import-crawl", icon: Lock },
 ];
 
 function NavList({ items }: { items: NavItem[] }) {
@@ -100,6 +106,14 @@ export function Sidebar() {
         </p>
 
         <NavList items={[...primaryNav, ...secondaryNav]} />
+
+        {/* Restricted-access section, visually separated with a divider */}
+        <div className="mt-4 border-t border-ru-grey/15 pt-4">
+          <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-ru-grey/70">
+            Restricted
+          </p>
+          <NavList items={restrictedNav} />
+        </div>
       </nav>
 
       {/* Footer */}
